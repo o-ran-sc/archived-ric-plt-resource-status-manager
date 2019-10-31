@@ -8,7 +8,7 @@
 API-docs
 ============
 
-..  API document can be found under \Swagger\RSM_API.yaml
+API document can be found under \Swagger\RSM_API.yaml
 
 API Introduction
 ---------------
