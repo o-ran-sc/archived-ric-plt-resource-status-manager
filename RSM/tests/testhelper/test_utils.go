@@ -18,7 +18,6 @@
 package testhelper
 
 import (
-	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader"
 	"rsm/configuration"
 	"rsm/logger"
 	"rsm/mocks"
@@ -51,11 +50,8 @@ func InitTestCase(t *testing.T) (services.RNibDataService, *rmrsender.RmrSender,
 	}
 
 	readerMock := &mocks.RnibReaderMock{}
-	rnibReaderProvider := func() reader.RNibReader {
-		return readerMock
-	}
 
 	rmrSender := InitRmrSender(&mocks.RmrMessengerMock{}, logger)
-	rnibDataService := services.NewRnibDataService(logger, config, rnibReaderProvider)
+	rnibDataService := services.NewRnibDataService(logger, config, readerMock)
 	return rnibDataService, rmrSender, logger
 }
