@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities"
-	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader"
 	"github.com/stretchr/testify/assert"
 	"net"
 	"rsm/configuration"
@@ -48,11 +47,8 @@ func setupRnibDataServiceTestWithMaxAttempts(t *testing.T, maxAttempts int) (*rN
 	config.Rnib.MaxRnibConnectionAttempts = maxAttempts
 
 	readerMock := &mocks.RnibReaderMock{}
-	rnibReaderProvider := func() reader.RNibReader {
-		return readerMock
-	}
 
-	rnibDataService := NewRnibDataService(logger, config, rnibReaderProvider)
+	rnibDataService := NewRnibDataService(logger, config, readerMock)
 	assert.NotNil(t, rnibDataService)
 
 	return rnibDataService, readerMock

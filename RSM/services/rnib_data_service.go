@@ -35,15 +35,15 @@ type RNibDataService interface {
 
 type rNibDataService struct {
 	logger             *logger.Logger
-	rnibReaderProvider func() reader.RNibReader
+	rnibReader         reader.RNibReader
 	maxAttempts        int
 	retryInterval      time.Duration
 }
 
-func NewRnibDataService(logger *logger.Logger, config *configuration.Configuration, rnibReaderProvider func() reader.RNibReader) *rNibDataService {
+func NewRnibDataService(logger *logger.Logger, config *configuration.Configuration, rnibReader reader.RNibReader) *rNibDataService {
 	return &rNibDataService{
 		logger:             logger,
-		rnibReaderProvider: rnibReaderProvider,
+		rnibReader:         rnibReader,
 		maxAttempts:        config.Rnib.MaxRnibConnectionAttempts,
 		retryInterval:      time.Duration(config.Rnib.RnibRetryIntervalMs) * time.Millisecond,
 	}
@@ -55,7 +55,7 @@ func (w *rNibDataService) GetNodeb(ranName string) (*entities.NodebInfo, error) 
 	var nodeb *entities.NodebInfo = nil
 
 	err := w.retry("GetNodeb", func() (err error) {
-		nodeb, err = w.rnibReaderProvider().GetNodeb(ranName)
+		nodeb, err = w.rnibReader.GetNodeb(ranName)
 		return
 	})
 
@@ -68,7 +68,7 @@ func (w *rNibDataService) GetListNodebIds() ([]*entities.NbIdentity, error) {
 	var nodeIds []*entities.NbIdentity = nil
 
 	err := w.retry("GetListNodebIds", func() (err error) {
-		nodeIds, err = w.rnibReaderProvider().GetListNodebIds()
+		nodeIds, err = w.rnibReader.GetListNodebIds()
 		return
 	})
 
@@ -77,7 +77,7 @@ func (w *rNibDataService) GetListNodebIds() ([]*entities.NbIdentity, error) {
 
 func (w *rNibDataService) PingRnib() bool {
 	err := w.retry("GetListNodebIds", func() (err error) {
-		_, err = w.rnibReaderProvider().GetListNodebIds()
+		_, err = w.rnibReader.GetListNodebIds()
 		return
 	})
 

@@ -3,7 +3,6 @@ package managers
 import (
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities"
-	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"rsm/configuration"
@@ -36,14 +35,11 @@ func initResourceStatusInitiateManagerTest(t *testing.T) (*mocks.RmrMessengerMoc
 	rmrSender := testhelper.InitRmrSender(rmrMessengerMock, logger)
 
 	readerMock := &mocks.RnibReaderMock{}
-	rnibReaderProvider := func() reader.RNibReader {
-		return readerMock
-	}
 
 	resourceStatusRequestData := &e2pdus.ResourceStatusRequestData{}
 	populateResourceStatusInitiateRequestParams(resourceStatusRequestData, config)
 
-	rnibDataService := services.NewRnibDataService(logger, config, rnibReaderProvider)
+	rnibDataService := services.NewRnibDataService(logger, config, readerMock)
 	resourceStatusInitiateManager := NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
 	return rmrMessengerMock, readerMock, resourceStatusRequestData, resourceStatusInitiateManager
 }

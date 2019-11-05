@@ -20,6 +20,7 @@ package main
 import (
 	"fmt"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader"
+	"gerrit.o-ran-sc.org/r/ric-plt/sdlgo"
 	"os"
 	"rsm/configuration"
 	"rsm/controllers"
@@ -49,10 +50,11 @@ func main() {
 		fmt.Printf("#app.main - failed to initialize logger, error: %s", err)
 		os.Exit(1)
 	}
-	reader.Init("e2Manager", MaxRnibPoolInstances)
+	db := sdlgo.NewDatabase()
+	sdl := sdlgo.NewSdlInstance("e2Manager", db)
+	defer sdl.Close()
 	logger.Infof("#app.main - Configuration %s", config)
-	defer reader.Close()
-	rnibDataService := services.NewRnibDataService(logger, config, reader.GetRNibReader)
+	rnibDataService := services.NewRnibDataService(logger, config, reader.GetRNibReader(sdl))
 	var msgImpl *rmrcgo.Context
 	rmrMessenger := msgImpl.Init(config.Rmr.ReadyIntervalSec, "tcp:"+strconv.Itoa(config.Rmr.Port), config.Rmr.MaxMsgSize, 0, logger)
 	rmrSender := rmrsender.NewRmrSender(logger, rmrMessenger)
