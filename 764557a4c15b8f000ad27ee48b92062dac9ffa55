@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f8db372_9e268118",
+        "filename": "INFO.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2019-11-11T10:41:23Z",
+      "side": 1,
+      "message": "Two missing committers: Hila Anina ( hanina@intl.att.com ), Yaki Ratz ( yaki.ratz@intl.att.com)\n\nThis was originally done via IT-18017 and TOC approval has been (as written in IT-18017) given in the 2019-10-23 TOC meeting, [link1] in section 6.b.iii .\n\n[link1] https://wiki.o-ran-sc.org/display/TOC/2019+Q4-Oct%2C+Nov%2C+Dec#id-2019Q4-Oct,Nov,Dec-20191023",
+      "revId": "764557a4c15b8f000ad27ee48b92062dac9ffa55",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
