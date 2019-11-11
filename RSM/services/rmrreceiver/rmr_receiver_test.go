@@ -20,6 +20,7 @@ package rmrreceiver
 import (
 	"fmt"
 	"rsm/configuration"
+	"rsm/converters"
 	"rsm/logger"
 	"rsm/managers"
 	"rsm/managers/rmrmanagers"
@@ -58,7 +59,8 @@ func initRmrReceiver(t *testing.T) *RmrReceiver {
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
 
 	rmrMessenger := initRmrMessenger(logger)
-	manager := rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, nil)
+	unpacker := converters.NewX2apPduUnpacker(logger)
+	manager := rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	return NewRmrReceiver(logger, rmrMessenger, manager)
 }

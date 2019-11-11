@@ -17,28 +17,48 @@
 
 package rmrmsghandlers
 
-
 import (
-//	"rsm/converters"
-//	"rsm/e2pdus"
+	"rsm/converters"
+	"rsm/e2pdus"
 	"rsm/logger"
 	"rsm/models"
 )
 
 type ResourceStatusResponseHandler struct {
 	logger *logger.Logger
+	converter converters.IResourceStatusResponseConverter
 }
 
-func NewResourceStatusResponseHandler(logger *logger.Logger) ResourceStatusResponseHandler {
+func NewResourceStatusResponseHandler(logger *logger.Logger, converter converters.IResourceStatusResponseConverter) ResourceStatusResponseHandler {
 	return ResourceStatusResponseHandler{
-		logger:logger,
+		logger: logger,
+		converter: converter,
 	}
 }
 
 func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 	h.logger.Infof("#ResourceStatusResponseHandler.Handle - RAN name: %s - Received resource status response notification", request.RanName)
-	//_, err := converters.UnpackX2apPduAsString(h.logger, request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
-	//if err != nil {
-	//	logger.Errorf("#ResourceStatusResponseHandler.Handle - unpack failed. Error: %v", err)
-	//}
+	if h.logger.DebugEnabled() {
+		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+		if err != nil {
+			h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
+			return
+		}
+		h.logger.Debugf("#ResourceStatusResponseHandler.Handle - RAN name: %s - pdu: %s", request.RanName, pduAsString)
+	}
+	response, err := h.converter.Convert(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
+		return
+	}
+	if response.ENB2_Measurement_ID == 0 {
+		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - ignoring response without ENB2_Measurement_ID for ENB1_Measurement_ID = %d", request.RanName, response.ENB1_Measurement_ID)
+		return
+	}
+
+
+	h.logger.Infof("#ResourceStatusResponseHandler.Handle - RAN name: %s - (success) ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d",
+		request.RanName,
+		response.ENB1_Measurement_ID,
+		response.ENB2_Measurement_ID)
 }

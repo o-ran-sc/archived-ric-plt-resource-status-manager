@@ -36,8 +36,6 @@ import (
 	"strconv"
 )
 
-const MaxRnibPoolInstances = 4
-
 func main() {
 	config, err := configuration.ParseConfiguration()
 	if err != nil {
@@ -60,7 +58,8 @@ func main() {
 	rmrSender := rmrsender.NewRmrSender(logger, rmrMessenger)
 
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	var rmrManager = rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewX2apPduUnpacker(logger))
+	unpacker := converters.NewX2apPduUnpacker(logger)
+	var rmrManager = rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	rmrReceiver := rmrreceiver.NewRmrReceiver(logger, rmrMessenger, rmrManager)
 	defer rmrMessenger.Close()

@@ -19,7 +19,6 @@ package rmrmsghandlers
 
 import (
 	"fmt"
-	"rsm/converters"
 	"rsm/e2pdus"
 	"rsm/logger"
 	"rsm/mocks"
@@ -29,17 +28,17 @@ import (
 )
 
 // Verify UnpackX2apPduAsString() and Convert() are called
-func TestResourceStatusFailureHandlerConvertFailure(t *testing.T) {
+func TestResourceStatusResponseHandler(t *testing.T) {
 	logger, err := logger.InitLogger(logger.DebugLevel)
 	if err != nil {
 		t.Errorf("#... - failed to initialize logger, error: %s", err)
 	}
 	payload:= []byte("aaa")
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
-	converterMock:= mocks.ResourceStatusFailureConverterMock{}
+	converterMock:= mocks.ResourceStatusResponseConverterMock{}
 	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
 	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return((*models.ResourceStatusResponse)(nil), fmt.Errorf("error"))
-	h:= NewResourceStatusFailureHandler(logger, &converterMock)
+	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
 
@@ -48,20 +47,20 @@ func TestResourceStatusFailureHandlerConvertFailure(t *testing.T) {
 }
 
 
-func TestResourceStatusFailureHandlerUnpackFailure(t *testing.T) {
+func TestResourceStatusResponseHandlerError(t *testing.T) {
 	logger, err := logger.InitLogger(logger.DebugLevel)
 	if err != nil {
 		t.Errorf("#... - failed to initialize logger, error: %s", err)
 	}
 	payload:= []byte("aaa")
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
-	converterMock:= mocks.ResourceStatusFailureConverterMock{}
+	converterMock:= mocks.ResourceStatusResponseConverterMock{}
 
 	err = fmt.Errorf("error")
 	var payloadAsString string
 	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(payloadAsString, err)
 	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return((*models.ResourceStatusResponse)(nil), fmt.Errorf("error"))
-	h:= NewResourceStatusFailureHandler(logger, &converterMock)
+	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
 
@@ -69,32 +68,41 @@ func TestResourceStatusFailureHandlerUnpackFailure(t *testing.T) {
 	converterMock.AssertNumberOfCalls(t, "Convert", 0)
 }
 
-func TestResourceStatusFailureHandler(t *testing.T) {
+
+func TestResourceStatusResponseHandlerEnb2Mid0(t *testing.T) {
 	logger, err := logger.InitLogger(logger.DebugLevel)
 	if err != nil {
 		t.Errorf("#... - failed to initialize logger, error: %s", err)
 	}
-	unpacker := converters.NewX2apPduUnpacker(logger)
-	converer:= converters.NewResourceStatusFailureConverter(unpacker)
-	var payload []byte
-	fmt.Sscanf("400900320000040027000300000e0028000300000c00054001620044401800004540130002f8290007ab500000434006000000000740", "%x", &payload)
+	payload:= []byte("aaa")
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
-	h:= NewResourceStatusFailureHandler(logger, converer)
+	response := &models.ResourceStatusResponse{}
+	converterMock:= mocks.ResourceStatusResponseConverterMock{}
+	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
+	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(response, nil)
+	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
+
+	converterMock.AssertNumberOfCalls(t, "UnpackX2apPduAsString", 1)
+	converterMock.AssertNumberOfCalls(t, "Convert", 1)
 }
 
-func TestResourceStatusFailureHandlerMinimalPdu(t *testing.T) {
+func TestResourceStatusResponseHandlerWithMid(t *testing.T) {
 	logger, err := logger.InitLogger(logger.DebugLevel)
 	if err != nil {
 		t.Errorf("#... - failed to initialize logger, error: %s", err)
 	}
-	unpacker := converters.NewX2apPduUnpacker(logger)
-	converer:= converters.NewResourceStatusFailureConverter(unpacker)
-	var payload []byte
-	fmt.Sscanf("400900170000030027000300000000280003000049000540020a80", "%x", &payload)
+	payload:= []byte("aaa")
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
-	h:= NewResourceStatusFailureHandler(logger, converer)
+	response := &models.ResourceStatusResponse{ENB1_Measurement_ID:1, ENB2_Measurement_ID:2}
+	converterMock:= mocks.ResourceStatusResponseConverterMock{}
+	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
+	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(response, nil)
+	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
+
+	converterMock.AssertNumberOfCalls(t, "UnpackX2apPduAsString", 1)
+	converterMock.AssertNumberOfCalls(t, "Convert", 1)
 }

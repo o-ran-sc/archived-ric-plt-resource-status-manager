@@ -35,8 +35,8 @@ type RmrMessageManager struct {
 	handlerProvider *rmrmsghandlerprovider.MessageHandlerProvider
 }
 
-func NewRmrMessageManager(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, unpacker converters.Asn1PduUnpacker) *RmrMessageManager {
-	handlerProvider := rmrmsghandlerprovider.NewMessageHandlerProvider(logger,config, rnibDataService, rmrSender, resourceStatusInitiateManager, unpacker)
+func NewRmrMessageManager(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) *RmrMessageManager {
+	handlerProvider := rmrmsghandlerprovider.NewMessageHandlerProvider(logger,config, rnibDataService, rmrSender, resourceStatusInitiateManager, rsConverter, rsFailureConverter)
 
 	return &RmrMessageManager{
 		handlerProvider: handlerProvider,

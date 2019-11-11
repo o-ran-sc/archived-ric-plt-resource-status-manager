@@ -28,17 +28,13 @@ import (
 	"unsafe"
 )
 
-type Asn1PduUnpacker interface {
-	UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error)
-}
-
 type X2apPduUnpacker struct {
 	logger *logger.Logger
 
 }
 
-func NewX2apPduUnpacker(logger *logger.Logger) Asn1PduUnpacker {
-	return &X2apPduUnpacker{logger :logger}
+func NewX2apPduUnpacker(logger *logger.Logger) X2apPduUnpacker {
+	return X2apPduUnpacker{logger :logger}
 }
 
 func (r X2apPduUnpacker) UnpackX2apPdu(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*C.E2AP_PDU_t, error) {

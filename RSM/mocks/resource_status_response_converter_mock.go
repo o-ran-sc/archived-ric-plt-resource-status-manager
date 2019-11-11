@@ -19,15 +19,20 @@ package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
+	"rsm/models"
 )
 
-type Asn1PduUnpackerMock struct {
+type ResourceStatusResponseConverterMock struct {
 	mock.Mock
 }
 
-func (m *Asn1PduUnpackerMock)UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error){
+func (m *ResourceStatusResponseConverterMock)Convert(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*models.ResourceStatusResponse, error){
+	args := m.Called(packedBufferSize, packedBuf, maxMessageBufferSize)
+	return args.Get(0).(*models.ResourceStatusResponse), args.Error(1)
+}
+
+func (m *ResourceStatusResponseConverterMock)UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error){
 	args := m.Called(packedBufferSize, packedBuf, maxMessageBufferSize)
 	return args.Get(0).(string), args.Error(1)
 }
-
 

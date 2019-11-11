@@ -39,18 +39,18 @@ type MessageHandlerProvider struct {
 	msgHandlers map[int]rmrmsghandlers.RmrMessageHandler
 }
 
-func NewMessageHandlerProvider(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, unpacker converters.Asn1PduUnpacker) *MessageHandlerProvider {
+func NewMessageHandlerProvider(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) *MessageHandlerProvider {
 	return &MessageHandlerProvider{
-		msgHandlers: initMessageHandlersMap(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, unpacker),
+		msgHandlers: initMessageHandlersMap(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, rsConverter, rsFailureConverter),
 	}
 }
 
-func initMessageHandlersMap(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, unpacker converters.Asn1PduUnpacker) map[int]rmrmsghandlers.RmrMessageHandler {
+func initMessageHandlersMap(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) map[int]rmrmsghandlers.RmrMessageHandler {
 	return map[int]rmrmsghandlers.RmrMessageHandler{
 		rmrcgo.RanConnected:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, config, resourceStatusInitiateManager, RanConnected),
 		rmrcgo.RanRestarted:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, config, resourceStatusInitiateManager, RanRestarted),
-		rmrcgo.RicResStatusFailure: rmrmsghandlers.NewResourceStatusFailureHandler(logger, unpacker),
-		rmrcgo.RicResStatusResp:    rmrmsghandlers.NewResourceStatusResponseHandler(logger),
+		rmrcgo.RicResStatusFailure: rmrmsghandlers.NewResourceStatusFailureHandler(logger, rsFailureConverter),
+		rmrcgo.RicResStatusResp:    rmrmsghandlers.NewResourceStatusResponseHandler(logger, rsConverter),
 	}
 }
 
