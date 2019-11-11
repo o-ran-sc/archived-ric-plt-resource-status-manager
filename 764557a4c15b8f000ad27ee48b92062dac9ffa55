@@ -16,6 +16,24 @@
       "revId": "764557a4c15b8f000ad27ee48b92062dac9ffa55",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb35f4ea_0665d30b",
+        "filename": "INFO.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000089
+      },
+      "writtenOn": "2019-11-11T18:31:31Z",
+      "side": 1,
+      "message": "These users are not in the LDAP group.\nIt could be that they were invited and never accepted their invites.\nI have invited them a second time just now.\n\nThis file will need to be re-generated after they have accepted their invites.\n\n$ lftools lfidapi invite yaki.ratz@intl.att.com oran-gerrit-ric-plt-resource-status-manager-committers\nValidating email yaki.ratz@intl.att.com\nInviting yaki.ratz@intl.att.com to join oran-gerrit-ric-plt-resource-status-manager-committers\n(.venv3Sept)  agardner at hyperion-2/tmp/rtmgr on foo\n$ lftools lfidapi invite hanina@intl.att.com oran-gerrit-ric-plt-resource-status-manager-committers\nValidating email hanina@intl.att.com\nInviting hanina@intl.att.com to join oran-gerrit-ric-plt-resource-status-manager-committers",
+      "parentUuid": "7f8db372_9e268118",
+      "revId": "764557a4c15b8f000ad27ee48b92062dac9ffa55",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
