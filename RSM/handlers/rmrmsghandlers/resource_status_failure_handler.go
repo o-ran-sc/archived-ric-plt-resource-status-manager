@@ -25,13 +25,13 @@ import (
 )
 
 type ResourceStatusFailureHandler struct {
-	logger   *logger.Logger
+	logger    *logger.Logger
 	converter converters.IResourceStatusResponseConverter
 }
 
 func NewResourceStatusFailureHandler(logger *logger.Logger, converter converters.IResourceStatusResponseConverter) ResourceStatusFailureHandler {
 	return ResourceStatusFailureHandler{
-		logger:   logger,
+		logger:    logger,
 		converter: converter,
 	}
 }
@@ -39,14 +39,14 @@ func NewResourceStatusFailureHandler(logger *logger.Logger, converter converters
 func (h ResourceStatusFailureHandler) Handle(request *models.RmrRequest) {
 	h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - Received resource status failure notification", request.RanName)
 	if h.logger.DebugEnabled() {
-		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
 		if err != nil {
 			h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
 			return
 		}
 		h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - message: %s", request.RanName, pduAsString)
 	}
-	response, err := h.converter.Convert(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+	response, err := h.converter.Convert(request.Payload)
 	if err != nil {
 		h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
 		return

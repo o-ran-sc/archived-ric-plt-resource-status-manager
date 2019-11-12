@@ -112,8 +112,8 @@ func convertResourceStatusFailure(pdu *C.E2AP_PDU_t) (*models.ResourceStatusResp
 }
 
 // Convert pdu to public ResourceStatusResponse
-func (r ResourceStatusFailureConverter) Convert(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*models.ResourceStatusResponse, error) {
-	pdu, err := r.UnpackX2apPdu(packedBufferSize, packedBuf, maxMessageBufferSize)
+func (r ResourceStatusFailureConverter) Convert(packedBuf []byte) (*models.ResourceStatusResponse, error) {
+	pdu, err := r.UnpackX2apPdu(packedBuf)
 	if err != nil {
 		return nil, err
 	}

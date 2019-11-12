@@ -200,7 +200,7 @@ func TestFiveCellsSuccess(t *testing.T) {
 }
 
 func getPackedPayloadForCell(cellId string, index int, resourceStatusRequestData e2pdus.ResourceStatusRequestData) []byte {
-	resourceStatusRequestData.CellID = cellId
+	resourceStatusRequestData.CellIdList = []string{cellId}
 	resourceStatusRequestData.MeasurementID = e2pdus.Measurement_ID(index)
 	expectedPayload, _, _ := e2pdus.BuildPackedResourceStatusRequest(enums.Registration_Request_start, &resourceStatusRequestData, e2pdus.MaxAsn1PackedBufferSize, e2pdus.MaxAsn1CodecMessageBufferSize, false)
 	return expectedPayload

@@ -38,8 +38,9 @@ static void assignEUTRANcellIdentifier (EUTRANCellIdentifier_t *eUTRANCellIdenti
 
 bool
 build_pack_resource_status_request(
-		uint8_t const* pLMN_Identity,
-		uint8_t const* eUTRANCellIdentifier,
+		uint8_t const** pLMN_Identities,
+		uint8_t const** eUTRANCellIdentifiers,
+		size_t nECGIs,
 		Measurement_ID_t measurement_ID, Measurement_ID_t measurement_ID2,
 		Registration_Request_t registration_Request /*Registration_Request_start,Registration_Request_stop,Registration_Request_partial_stop, Registration_Request_add*/,
 		uint32_t reportCharacteristics,
@@ -51,8 +52,9 @@ build_pack_resource_status_request(
 )
 {
 	return build_pack_resource_status_request_aux(
-			pLMN_Identity,
-            eUTRANCellIdentifier,
+			pLMN_Identities,
+            eUTRANCellIdentifiers,
+            nECGIs,
 			measurement_ID,	measurement_ID2,
 			registration_Request,
 			reportCharacteristics,
@@ -66,8 +68,9 @@ build_pack_resource_status_request(
 
 bool
 build_pack_resource_status_request_aux(
-		uint8_t const* pLMN_Identity,
-		uint8_t const* eUTRANCellIdentifier,
+		uint8_t const** pLMN_Identities,
+		uint8_t const** eUTRANCellIdentifiers,
+		size_t nECGIs,
 		Measurement_ID_t measurement_ID, Measurement_ID_t measurement_ID2,
 		Registration_Request_t registration_Request /*Registration_Request_start,Registration_Request_stop,Registration_Request_partial_stop, Registration_Request_add*/,
 		uint32_t reportCharacteristics,
@@ -151,15 +154,17 @@ build_pack_resource_status_request_aux(
     cellToReport_List_ie->criticality = Criticality_ignore;
     cellToReport_List_ie->value.present = ResourceStatusRequest_IEs__value_PR_CellToReport_List;
 
-    CellToReport_ItemIEs_t *item = calloc(1, sizeof(CellToReport_ItemIEs_t));
-    assert(item != 0);
-    ASN_SEQUENCE_ADD(&cellToReport_List_ie->value.choice.CellToReport_List, item);
+    for (size_t i = 0; i < nECGIs; i++){
+        CellToReport_ItemIEs_t *item = calloc(1, sizeof(CellToReport_ItemIEs_t));
+        assert(item != 0);
+        ASN_SEQUENCE_ADD(&cellToReport_List_ie->value.choice.CellToReport_List, item);
 
-    item->id = ProtocolIE_ID_id_CellToReport_Item;
-	item->criticality = Criticality_ignore;
-	item->value.present = CellToReport_ItemIEs__value_PR_CellToReport_Item;
-	assignPLMN_Identity(&item->value.choice.CellToReport_Item.cell_ID.pLMN_Identity, pLMN_Identity);
-	assignEUTRANcellIdentifier(&item->value.choice.CellToReport_Item.cell_ID.eUTRANcellIdentifier,eUTRANCellIdentifier);
+        item->id = ProtocolIE_ID_id_CellToReport_Item;
+        item->criticality = Criticality_ignore;
+        item->value.present = CellToReport_ItemIEs__value_PR_CellToReport_Item;
+        assignPLMN_Identity(&item->value.choice.CellToReport_Item.cell_ID.pLMN_Identity, pLMN_Identities[i]);
+        assignEUTRANcellIdentifier(&item->value.choice.CellToReport_Item.cell_ID.eUTRANcellIdentifier,eUTRANCellIdentifiers[i]);
+    }
 
 	if (reportingPeriodicity >= 0){
 		ResourceStatusRequest_IEs_t *reportingPeriodicity_ie = calloc(1, sizeof(ResourceStatusRequest_IEs_t));

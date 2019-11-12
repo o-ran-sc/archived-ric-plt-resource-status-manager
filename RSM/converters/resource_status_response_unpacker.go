@@ -34,8 +34,8 @@ const (
 )
 
 type  IResourceStatusResponseConverter interface {
-	Convert(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*models.ResourceStatusResponse, error)
-	UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error)
+	Convert(packedBuf []byte) (*models.ResourceStatusResponse, error)
+	UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error)
 }
 
 type ResourceStatusResponseConverter struct {
@@ -157,8 +157,8 @@ func convertResourceStatusResponse(pdu *C.E2AP_PDU_t) (*models.ResourceStatusRes
 }
 
 // Convert pdu to public ResourceStatusResponse
-func (r ResourceStatusResponseConverter) Convert(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*models.ResourceStatusResponse, error) {
-	pdu, err := r.UnpackX2apPdu(packedBufferSize, packedBuf, maxMessageBufferSize)
+func (r ResourceStatusResponseConverter) Convert(packedBuf []byte) (*models.ResourceStatusResponse, error) {
+	pdu, err := r.UnpackX2apPdu(packedBuf)
 	if err != nil {
 		return nil, err
 	}

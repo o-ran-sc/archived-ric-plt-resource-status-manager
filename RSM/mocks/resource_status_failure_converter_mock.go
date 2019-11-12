@@ -27,13 +27,13 @@ type ResourceStatusFailureConverterMock struct {
 }
 
 
-func (m *ResourceStatusFailureConverterMock)Convert(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*models.ResourceStatusResponse, error){
-	args := m.Called(packedBufferSize, packedBuf, maxMessageBufferSize)
+func (m *ResourceStatusFailureConverterMock)Convert(packedBuf []byte) (*models.ResourceStatusResponse, error){
+	args := m.Called(packedBuf)
 	return args.Get(0).(*models.ResourceStatusResponse), args.Error(1)
 }
 
-func (m *ResourceStatusFailureConverterMock)UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error){
-	args := m.Called(packedBufferSize, packedBuf, maxMessageBufferSize)
+func (m *ResourceStatusFailureConverterMock)UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error){
+	args := m.Called(packedBuf, maxMessageBufferSize)
 	return args.Get(0).(string), args.Error(1)
 }
 

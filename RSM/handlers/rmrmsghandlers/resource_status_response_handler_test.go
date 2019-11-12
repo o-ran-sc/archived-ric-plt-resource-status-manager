@@ -36,8 +36,8 @@ func TestResourceStatusResponseHandler(t *testing.T) {
 	payload:= []byte("aaa")
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
 	converterMock:= mocks.ResourceStatusResponseConverterMock{}
-	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
-	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return((*models.ResourceStatusResponse)(nil), fmt.Errorf("error"))
+	converterMock.On("UnpackX2apPduAsString", req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
+	converterMock.On("Convert", req.Payload).Return((*models.ResourceStatusResponse)(nil), fmt.Errorf("error"))
 	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
@@ -58,8 +58,8 @@ func TestResourceStatusResponseHandlerError(t *testing.T) {
 
 	err = fmt.Errorf("error")
 	var payloadAsString string
-	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(payloadAsString, err)
-	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return((*models.ResourceStatusResponse)(nil), fmt.Errorf("error"))
+	converterMock.On("UnpackX2apPduAsString", req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(payloadAsString, err)
+	converterMock.On("Convert", req.Payload).Return((*models.ResourceStatusResponse)(nil), fmt.Errorf("error"))
 	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
@@ -78,8 +78,8 @@ func TestResourceStatusResponseHandlerEnb2Mid0(t *testing.T) {
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
 	response := &models.ResourceStatusResponse{}
 	converterMock:= mocks.ResourceStatusResponseConverterMock{}
-	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
-	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(response, nil)
+	converterMock.On("UnpackX2apPduAsString", req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
+	converterMock.On("Convert", req.Payload).Return(response, nil)
 	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)
@@ -97,8 +97,8 @@ func TestResourceStatusResponseHandlerWithMid(t *testing.T) {
 	req:= models.RmrRequest{RanName: "test", StartTime:time.Now(), Payload:payload,Len:len(payload)}
 	response := &models.ResourceStatusResponse{ENB1_Measurement_ID:1, ENB2_Measurement_ID:2}
 	converterMock:= mocks.ResourceStatusResponseConverterMock{}
-	converterMock.On("UnpackX2apPduAsString", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
-	converterMock.On("Convert", req.Len, req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(response, nil)
+	converterMock.On("UnpackX2apPduAsString", req.Payload, e2pdus.MaxAsn1CodecMessageBufferSize).Return(string(payload), nil)
+	converterMock.On("Convert", req.Payload).Return(response, nil)
 	h:= NewResourceStatusResponseHandler(logger, &converterMock)
 
 	h.Handle(&req)

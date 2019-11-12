@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"rsm/configuration"
 	"rsm/converters"
+	"rsm/e2pdus"
 	"rsm/handlers/rmrmsghandlers"
 	"rsm/managers"
 	"rsm/tests/testhelper"
@@ -41,7 +42,7 @@ func TestGetNotificationHandlerSuccess(t *testing.T) {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	unpacker := converters.NewX2apPduUnpacker(logger)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	var testCases = []struct {
 		msgType int
 		handler rmrmsghandlers.RmrMessageHandler
@@ -51,7 +52,7 @@ func TestGetNotificationHandlerSuccess(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 		t.Run(fmt.Sprintf("%d", tc.msgType), func(t *testing.T) {
 			handler, err := provider.GetMessageHandler(tc.msgType)
 			if err != nil {
@@ -76,7 +77,7 @@ func TestGetNotificationHandlerFailure(t *testing.T) {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	unpacker := converters.NewX2apPduUnpacker(logger)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 
 	var testCases = []struct {
 		msgType   int
@@ -85,7 +86,7 @@ func TestGetNotificationHandlerFailure(t *testing.T) {
 		{9999 /*unknown*/, "notification handler not found"},
 	}
 	for _, tc := range testCases {
-		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 		t.Run(fmt.Sprintf("%d", tc.msgType), func(t *testing.T) {
 			_, err := provider.GetMessageHandler(tc.msgType)
 			if err == nil {
@@ -97,4 +98,3 @@ func TestGetNotificationHandlerFailure(t *testing.T) {
 		})
 	}
 }
-

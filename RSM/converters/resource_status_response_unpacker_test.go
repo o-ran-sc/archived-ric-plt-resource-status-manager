@@ -32,7 +32,7 @@ import (
 
 func TestResourceStatusResponseConverter(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.DebugLevel)
-	unpacker := NewX2apPduUnpacker(logger)
+	unpacker := NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	rsConverters := NewResourceStatusResponseConverter(unpacker)
 
 	var testCases = []struct {
@@ -179,7 +179,7 @@ func TestResourceStatusResponseConverter(t *testing.T) {
 				t.Errorf("convert inputPayloadAsStr to payloadAsByte. Error: %v\n", err)
 			}
 
-			response, err := rsConverters.Convert(len(payload), payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
+			response, err := rsConverters.Convert(payload)
 			if err != nil {
 				t.Errorf("want: success, got: unpack failed. Error: %v\n", err)
 			}
@@ -199,7 +199,7 @@ func TestResourceStatusResponseConverter(t *testing.T) {
 
 func TestResourceStatusResponseConverterError(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.InfoLevel)
-	unpacker := NewX2apPduUnpacker(logger)
+	unpacker := NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	rsConverters := NewResourceStatusResponseConverter(unpacker)
 
 	wantError := "unpacking error: #src/asn1codec_utils.c.unpack_pdu_aux - Failed to decode E2AP-PDU (consumed 0), error = 0 Success"
@@ -211,7 +211,7 @@ func TestResourceStatusResponseConverterError(t *testing.T) {
 		t.Errorf("convert inputPayloadAsStr to payloadAsByte. Error: %v\n", err)
 	}
 
-	_, err = rsConverters.Convert(len(payload), payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
+	_, err = rsConverters.Convert(payload)
 	if err != nil {
 		if 0 != strings.Compare(fmt.Sprintf("%s", err), wantError) {
 			t.Errorf("want failure: %s, got: %s", wantError, err)
@@ -224,7 +224,7 @@ func TestResourceStatusResponseConverterError(t *testing.T) {
 
 func TestResourceStatusResponseConverterPduOfFailure(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.InfoLevel)
-	unpacker := NewX2apPduUnpacker(logger)
+	unpacker := NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	rsConverters := NewResourceStatusResponseConverter(unpacker)
 
 	wantError := "unexpected PDU, 3"
@@ -235,7 +235,7 @@ func TestResourceStatusResponseConverterPduOfFailure(t *testing.T) {
 		t.Errorf("convert inputPayloadAsStr to payloadAsByte. Error: %v\n", err)
 	}
 
-	_, err = rsConverters.Convert(len(payload), payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
+	_, err = rsConverters.Convert(payload)
 	if err != nil {
 		if 0 != strings.Compare(fmt.Sprintf("%s", err), wantError) {
 			t.Errorf("want failure: %s, got: %s", wantError, err)
@@ -248,7 +248,7 @@ func TestResourceStatusResponseConverterPduOfFailure(t *testing.T) {
 
 func TestResourceStatusResponseConverterWrongPdu(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.InfoLevel)
-	unpacker := NewX2apPduUnpacker(logger)
+	unpacker := NewX2apPduUnpacker(logger,e2pdus.MaxAsn1CodecMessageBufferSize)
 	rsConverters := NewResourceStatusResponseConverter(unpacker)
 
 	wantError := "unexpected PDU - not a resource status response"
@@ -259,7 +259,7 @@ func TestResourceStatusResponseConverterWrongPdu(t *testing.T) {
 		t.Errorf("convert inputPayloadAsStr to payloadAsByte. Error: %v\n", err)
 	}
 
-	_, err = rsConverters.Convert(len(payload), payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
+	_, err = rsConverters.Convert(payload)
 	if err != nil {
 		if 0 != strings.Compare(fmt.Sprintf("%s", err), wantError) {
 			t.Errorf("want failure: %s, got: %s", wantError, err)

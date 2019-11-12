@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"rsm/configuration"
 	"rsm/converters"
+	"rsm/e2pdus"
 	"rsm/logger"
 	"rsm/managers"
 	"rsm/managers/rmrmanagers"
@@ -59,7 +60,7 @@ func initRmrReceiver(t *testing.T) *RmrReceiver {
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
 
 	rmrMessenger := initRmrMessenger(logger)
-	unpacker := converters.NewX2apPduUnpacker(logger)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	manager := rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	return NewRmrReceiver(logger, rmrMessenger, manager)

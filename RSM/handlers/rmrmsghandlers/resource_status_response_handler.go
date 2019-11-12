@@ -25,13 +25,13 @@ import (
 )
 
 type ResourceStatusResponseHandler struct {
-	logger *logger.Logger
+	logger    *logger.Logger
 	converter converters.IResourceStatusResponseConverter
 }
 
 func NewResourceStatusResponseHandler(logger *logger.Logger, converter converters.IResourceStatusResponseConverter) ResourceStatusResponseHandler {
 	return ResourceStatusResponseHandler{
-		logger: logger,
+		logger:    logger,
 		converter: converter,
 	}
 }
@@ -39,14 +39,14 @@ func NewResourceStatusResponseHandler(logger *logger.Logger, converter converter
 func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 	h.logger.Infof("#ResourceStatusResponseHandler.Handle - RAN name: %s - Received resource status response notification", request.RanName)
 	if h.logger.DebugEnabled() {
-		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
 		if err != nil {
 			h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
 			return
 		}
 		h.logger.Debugf("#ResourceStatusResponseHandler.Handle - RAN name: %s - pdu: %s", request.RanName, pduAsString)
 	}
-	response, err := h.converter.Convert(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+	response, err := h.converter.Convert(request.Payload)
 	if err != nil {
 		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
 		return
@@ -55,7 +55,6 @@ func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - ignoring response without ENB2_Measurement_ID for ENB1_Measurement_ID = %d", request.RanName, response.ENB1_Measurement_ID)
 		return
 	}
-
 
 	h.logger.Infof("#ResourceStatusResponseHandler.Handle - RAN name: %s - (success) ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d",
 		request.RanName,

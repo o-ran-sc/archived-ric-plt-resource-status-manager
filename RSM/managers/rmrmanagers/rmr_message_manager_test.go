@@ -19,6 +19,7 @@ package rmrmanagers
 import (
 	"rsm/configuration"
 	"rsm/converters"
+	"rsm/e2pdus"
 	"rsm/managers"
 	"rsm/rmrcgo"
 	"rsm/tests/testhelper"
@@ -30,7 +31,7 @@ func TestRmrMessageManagerSuccess(t *testing.T) {
 	rnibDataService, rmrSender, logger := testhelper.InitTestCase(t)
 	config, _ := configuration.ParseConfiguration()
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	unpacker := converters.NewX2apPduUnpacker(logger)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	manager := NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	xactionByteArr := []byte("1111111")
@@ -45,7 +46,7 @@ func TestRmrMessageManagerFailure(t *testing.T) {
 	rnibDataService, rmrSender, logger := testhelper.InitTestCase(t)
 	config, _ := configuration.ParseConfiguration()
 	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	unpacker := converters.NewX2apPduUnpacker(logger)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	manager := NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	xactionByteArr := []byte("1111111")

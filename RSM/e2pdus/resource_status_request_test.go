@@ -35,7 +35,7 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 	}{
 		{
 			request: ResourceStatusRequestData{
-				CellID:						  "0a0b0c:abcd8000",
+				CellIdList:                   []string{"0a0b0c:abcd8000"},
 				MeasurementID:                15,
 				MeasurementID2:               0,
 				PartialSuccessAllowed:        true,
@@ -53,7 +53,7 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 		},
 		{
 			request: ResourceStatusRequestData{
-				CellID:						  "0a0b0c:abcd8000",
+				CellIdList:                   []string{"0a0b0c:abcd8000"},
 				MeasurementID:                15,
 				MeasurementID2:               0,
 				PartialSuccessAllowed:        true,
@@ -71,7 +71,7 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 		},
 		{
 			request: ResourceStatusRequestData{
-				CellID:						  "0a0b0c:abcd8000",
+				CellIdList:                   []string{"0a0b0c:abcd8000"},
 				MeasurementID:                15,
 				MeasurementID2:               0,
 				PartialSuccessAllowed:        true,
@@ -89,7 +89,7 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 		},
 		{
 			request: ResourceStatusRequestData{
-				CellID:						  "0a0b0c:abcd8000",
+				CellIdList:                   []string{"0a0b0c:abcd8000"},
 				MeasurementID:                15,
 				MeasurementID2:               0,
 				PartialSuccessAllowed:        false,
@@ -105,6 +105,24 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 			},
 			packedPdu: "000900370000070027000300000e001c000100002600040e000000001d400d00001f4008000a0b0cabcd8000001e400160006d4001600091400140",
 		},
+		{
+			request: ResourceStatusRequestData{
+				CellIdList:                   []string{"0a0b0c:abcd8000", "0b0c0d:acde8000"},
+				MeasurementID:                15,
+				MeasurementID2:               0,
+				PartialSuccessAllowed:        true,
+				PrbPeriodic:                  true,
+				TnlLoadIndPeriodic:           true,
+				HwLoadIndPeriodic:            true,
+				AbsStatusPeriodic:            true,
+				RsrpMeasurementPeriodic:      true,
+				CsiPeriodic:                  true,
+				PeriodicityMS:                enums.ReportingPeriodicity_one_thousand_ms,
+				PeriodicityRsrpMeasurementMS: enums.ReportingPeriodicityRSRPMR_one_hundred_20_ms,
+				PeriodicityCsiMS:             enums.ReportingPeriodicityCSIR_ms5,
+			},
+			packedPdu: "000900480000080027000300000e001c00010000260004fe000000001d401901001f4008000a0b0cabcd8000001f4008000b0c0dacde8000001e4001000040400100006d4001000091400100",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -114,7 +132,7 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 			if err != nil {
 				t.Errorf("want: success, got: pack failed. Error: %v\n", err)
 			} else {
-				t.Logf("packed resource status request (size=%d): %x\n\n%s", len(payload), payload,asString)
+				t.Logf("packed resource status request (size=%d): %x\n\n%s", len(payload), payload, asString)
 				tmp := fmt.Sprintf("%x", payload)
 				if len(tmp) != len(tc.packedPdu) {
 					t.Errorf("want packed len:%d, got: %d\n", len(tc.packedPdu)/2, len(payload)/2)
@@ -132,7 +150,7 @@ func TestBuildPackedResourceStatusRequest(t *testing.T) {
 
 func TestBuildPackedResourceStatusRequestError(t *testing.T) {
 	request := ResourceStatusRequestData{
-		CellID:						  "0a0b0c:abcd8000",
+		CellIdList:                   []string{"0a0b0c:abcd8000"},
 		MeasurementID:                15,
 		MeasurementID2:               0,
 		PrbPeriodic:                  true,
@@ -145,7 +163,7 @@ func TestBuildPackedResourceStatusRequestError(t *testing.T) {
 		PeriodicityRsrpMeasurementMS: enums.ReportingPeriodicityRSRPMR_one_hundred_20_ms,
 		PeriodicityCsiMS:             enums.ReportingPeriodicityCSIR_ms5,
 	}
-	expected:= "packing error: #src/asn1codec_utils.c.pack_pdu_aux - Encoded output of E2AP-PDU, is too big"
+	expected := "packing error: #src/asn1codec_utils.c.pack_pdu_aux - Encoded output of E2AP-PDU, is too big"
 	_, _, err := BuildPackedResourceStatusRequest(enums.Registration_Request_start, &request, 40 /*max packed buffer*/, MaxAsn1CodecMessageBufferSize /*max message buffer*/, true /*withDebug*/)
 	if err != nil {
 		if !strings.Contains(err.Error(), expected) {
@@ -159,7 +177,7 @@ func TestBuildPackedResourceStatusRequestError(t *testing.T) {
 
 func TestBuildPackedResourceStatusInvalidCellID(t *testing.T) {
 	request := ResourceStatusRequestData{
-		CellID:						  "0a0b0cabcd8000",
+		CellIdList:                   []string{"0a0b0cabcd8000"},
 		MeasurementID:                15,
 		MeasurementID2:               0,
 		PrbPeriodic:                  true,
@@ -172,7 +190,7 @@ func TestBuildPackedResourceStatusInvalidCellID(t *testing.T) {
 		PeriodicityRsrpMeasurementMS: enums.ReportingPeriodicityRSRPMR_one_hundred_20_ms,
 		PeriodicityCsiMS:             enums.ReportingPeriodicityCSIR_ms5,
 	}
-	expected:= "BuildPackedResourceStatusRequest() - unexpected CellID value [0a0b0cabcd8000] (want: \"<PLMNIdentifier>:<eUTRANCellIdentifier>\"), err: unexpected EOF"
+	expected := "BuildPackedResourceStatusRequest() - unexpected CellID value [0a0b0cabcd8000]@0 (want: \"<PLMNIdentifier>:<eUTRANCellIdentifier>\"), err: unexpected EOF"
 	_, _, err := BuildPackedResourceStatusRequest(enums.Registration_Request_start, &request, MaxAsn1PackedBufferSize /*max packed buffer*/, MaxAsn1CodecMessageBufferSize /*max message buffer*/, true /*withDebug*/)
 	if err != nil {
 		if !strings.Contains(err.Error(), expected) {
@@ -186,7 +204,7 @@ func TestBuildPackedResourceStatusInvalidCellID(t *testing.T) {
 
 func TestBuildPackedResourceStatusInvalidPeriodicity(t *testing.T) {
 	request := ResourceStatusRequestData{
-		CellID:						  "0a0b0c:abcd8000",
+		CellIdList:                   []string{"0a0b0c:abcd8000"},
 		MeasurementID:                15,
 		MeasurementID2:               0,
 		PrbPeriodic:                  true,
@@ -199,7 +217,54 @@ func TestBuildPackedResourceStatusInvalidPeriodicity(t *testing.T) {
 		PeriodicityRsrpMeasurementMS: enums.ReportingPeriodicityRSRPMR_one_hundred_20_ms,
 		PeriodicityCsiMS:             enums.ReportingPeriodicityCSIR_ms5,
 	}
-	expected:= "BuildPackedResourceStatusRequest - packing error: #src/asn1codec_utils.c.pack_pdu_aux - Failed to encode E2AP-PDU, error = 9 Bad file descriptor"
+	expected := "BuildPackedResourceStatusRequest - packing error: #src/asn1codec_utils.c.pack_pdu_aux - Failed to encode E2AP-PDU, error = 9 Bad file descriptor"
+	_, _, err := BuildPackedResourceStatusRequest(enums.Registration_Request_start, &request, MaxAsn1PackedBufferSize /*max packed buffer*/, MaxAsn1CodecMessageBufferSize /*max message buffer*/, true /*withDebug*/)
+	if err != nil {
+		if !strings.Contains(err.Error(), expected) {
+			t.Errorf("want failure:[%s], got: [%s]\n", expected, err)
+		}
+	} else {
+		t.Errorf("want failure: ...%s..., got: success", expected)
+
+	}
+}
+
+func TestBuildPackedResourceStatusTooManyCells(t *testing.T) {
+	request := 	ResourceStatusRequestData{
+		CellIdList: []string{
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
+			"0a0b0c:abcd8000",
+		},
+		MeasurementID:                15,
+		MeasurementID2:               0,
+		PartialSuccessAllowed:        true,
+		PrbPeriodic:                  true,
+		TnlLoadIndPeriodic:           true,
+		HwLoadIndPeriodic:            true,
+		AbsStatusPeriodic:            true,
+		RsrpMeasurementPeriodic:      true,
+		CsiPeriodic:                  true,
+		PeriodicityMS:                enums.ReportingPeriodicity_one_thousand_ms,
+		PeriodicityRsrpMeasurementMS: enums.ReportingPeriodicityRSRPMR_one_hundred_20_ms,
+		PeriodicityCsiMS:             enums.ReportingPeriodicityCSIR_ms5,
+	}
+
+	expected := "BuildPackedResourceStatusRequest - packing error: #src/asn1codec_utils.c.pack_pdu_aux - Failed to encode E2AP-PDU, error = 9 Bad file descriptor"
 	_, _, err := BuildPackedResourceStatusRequest(enums.Registration_Request_start, &request, MaxAsn1PackedBufferSize /*max packed buffer*/, MaxAsn1CodecMessageBufferSize /*max message buffer*/, true /*withDebug*/)
 	if err != nil {
 		if !strings.Contains(err.Error(), expected) {

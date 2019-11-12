@@ -19,6 +19,7 @@ package e2pdus
 
 // #cgo CFLAGS: -I../asn1codec/inc/ -I../asn1codec/e2ap_engine/
 // #cgo LDFLAGS: -L ../asn1codec/lib/ -L../asn1codec/e2ap_engine/ -le2ap_codec -lasncodec
+// #include <stdlib.h>
 // #include <asn1codec_utils.h>
 // #include <resource_status_request_wrapper.h>
 import "C"
@@ -37,7 +38,7 @@ const (
 type Measurement_ID int64
 
 type ResourceStatusRequestData struct {
-	CellID                       string // PLMNIdentifier:eUTRANCellIdentifier
+	CellIdList                   []string // PLMNIdentifier:eUTRANCellIdentifier
 	MeasurementID                Measurement_ID
 	MeasurementID2               Measurement_ID
 	PartialSuccessAllowed        bool
@@ -59,18 +60,34 @@ func BuildPackedResourceStatusRequest(registrationRequest enums.Registration_Req
 	packedBufSize := C.ulong(len(packedBuf))
 	pduAsString := ""
 
-	var pLMNIdentifier, eUTRANCellIdentifier string
+	pLMNIdentities := make([]*C.char, len(request.CellIdList))
+	eUTRANCellIdentifiers := make([]*C.char, len(request.CellIdList))
 
-	if _, err := fmt.Sscanf(request.CellID, "%x:%x", &pLMNIdentifier, &eUTRANCellIdentifier); err != nil {
-		return nil, "", fmt.Errorf("BuildPackedResourceStatusRequest() - unexpected CellID value [%s] (want: \"<PLMNIdentifier>:<eUTRANCellIdentifier>\"), err: %s", request.CellID, err)
+	for i, cellID := range request.CellIdList {
+		var pLMNIdentity, eUTRANCellIdentifier string
+		if _, err := fmt.Sscanf(cellID, "%x:%x", &pLMNIdentity, &eUTRANCellIdentifier); err != nil {
+			return nil, "", fmt.Errorf("BuildPackedResourceStatusRequest() - unexpected CellID value [%s]@%d (want: \"<PLMNIdentifier>:<eUTRANCellIdentifier>\"), err: %s", cellID, i, err)
+		}
+		pLMNIdentities[i], eUTRANCellIdentifiers[i] = C.CString(pLMNIdentity), C.CString(eUTRANCellIdentifier)
 	}
 
+	defer func() {
+		for _, cPtr := range pLMNIdentities {
+			C.free(unsafe.Pointer(cPtr))
+
+		}
+		for _, cPtr := range eUTRANCellIdentifiers {
+			C.free(unsafe.Pointer(cPtr))
+		}
+
+	}()
+
 	/*
-	9.2.0	General
-	When specifying information elements which are to be represented by bit strings, if not otherwise specifically stated in the semantics description of the concerned IE or elsewhere, the following principle applies with regards to the ordering of bits:
-	-	The first bit (leftmost bit) contains the most significant bit (MSB);
-	-	The last bit (rightmost bit) contains the least significant bit (LSB);
-	-	When importing bit strings from other specifications, the first bit of the bit string contains the first bit of the concerned information.
+		9.2.0	General
+		When specifying information elements which are to be represented by bit strings, if not otherwise specifically stated in the semantics description of the concerned IE or elsewhere, the following principle applies with regards to the ordering of bits:
+		-	The first bit (leftmost bit) contains the most significant bit (MSB);
+		-	The last bit (rightmost bit) contains the least significant bit (LSB);
+		-	When importing bit strings from other specifications, the first bit of the bit string contains the first bit of the concerned information.
 
 	*/
 	/*reportCharacteristics:
@@ -114,8 +131,9 @@ func BuildPackedResourceStatusRequest(registrationRequest enums.Registration_Req
 	reportCharacteristics := uint32(prbPeriodic<<7 | tnlLoadIndPeriodic<<6 | hwLoadIndPeriodic<<5 | compositeAvailablCapacityPeriodic<<4 | absStatusPeriodic<<3 | rsrpMeasurementPeriodic<<2 | csiPeriodic<<1)
 
 	if !C.build_pack_resource_status_request(
-		(*C.uchar)(unsafe.Pointer(&[]byte(pLMNIdentifier)[0])),
-		(*C.uchar)(unsafe.Pointer(&[]byte(eUTRANCellIdentifier)[0])),
+		(**C.uchar)(unsafe.Pointer(&pLMNIdentities[0])),
+		(**C.uchar)(unsafe.Pointer(&eUTRANCellIdentifiers[0])),
+		C.ulong(len(request.CellIdList)),
 		C.Measurement_ID_t(request.MeasurementID),
 		C.Measurement_ID_t(request.MeasurementID2),
 		C.Registration_Request_t(registrationRequest),

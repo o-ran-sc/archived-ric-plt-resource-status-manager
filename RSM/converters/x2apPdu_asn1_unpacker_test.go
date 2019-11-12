@@ -32,7 +32,7 @@ import (
 
 func TestUnpackX2apPduResponse(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.DebugLevel)
-	unpacker := NewX2apPduUnpacker(logger)
+	unpacker := NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 
 	wantPduAsStr := `UnsuccessfulOutcome ::= {
     procedureCode: 9
@@ -92,7 +92,7 @@ func TestUnpackX2apPduResponse(t *testing.T) {
 		t.Errorf("convert inputPayloadAsStr to payloadAsByte. Error: %v\n", err)
 	}
 
-	response, err := unpacker.UnpackX2apPduAsString(len(payload), payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
+	response, err := unpacker.UnpackX2apPduAsString(payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
 	if err != nil {
 		t.Errorf("want: success, got: unpack failed. Error: %v\n", err)
 	}
@@ -114,7 +114,7 @@ func TestUnpackX2apPduResponse(t *testing.T) {
 
 func TestUnpackX2apPduError(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.InfoLevel)
-	unpacker := NewX2apPduUnpacker(logger)
+	unpacker := NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 
 	wantError := "unpacking error: #src/asn1codec_utils.c.unpack_pdu_aux - Failed to decode E2AP-PDU (consumed 0), error = 0 Success"
 	//--------------------2006002a
@@ -125,7 +125,7 @@ func TestUnpackX2apPduError(t *testing.T) {
 		t.Errorf("convert inputPayloadAsStr to payloadAsByte. Error: %v\n", err)
 	}
 
-	_, err = unpacker.UnpackX2apPduAsString(len(payload), payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
+	_, err = unpacker.UnpackX2apPduAsString(payload, e2pdus.MaxAsn1CodecMessageBufferSize /*message buffer*/)
 	if err != nil {
 		if 0 != strings.Compare(fmt.Sprintf("%s", err), wantError) {
 			t.Errorf("want failure: %s, got: %s", wantError, err)

@@ -48,12 +48,14 @@ or Third bits is set to 1,
         size_t packed_buf_size = 4096;
         unsigned char outBuf[packed_buf_size];
         char errorBuf[error_buf_size];
-        uint8_t pLMN_Identity[] = {0xa,0xb,0xc};
-        uint8_t eUTRANCellIdentifier[] = {0xab, 0xcd, 0x70, 0};
+        const uint8_t pLMN_Identity[] = {0xa,0xb,0xc};
+        const uint8_t eUTRANCellIdentifier[] = {0xab, 0xcd, 0x70, 0};
+        const uint8_t *pLMN_Identities[] = {pLMN_Identity};
+        const uint8_t *eUTRANCellIdentifiers[] = {eUTRANCellIdentifier};
         E2AP_PDU_t *pdu;
 
         bool result = build_pack_resource_status_request(
-        		pLMN_Identity, eUTRANCellIdentifier,
+        		pLMN_Identities, eUTRANCellIdentifiers, 1,
         		15 /*measurement_ID*/, 0  /*measurement_ID2*/,
 				Registration_Request_start /*Registration_Request_start,Registration_Request_stop,Registration_Request_partial_stop, Registration_Request_add*/,
         		0xf0,

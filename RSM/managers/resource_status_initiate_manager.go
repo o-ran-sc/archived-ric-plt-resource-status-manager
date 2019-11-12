@@ -56,18 +56,18 @@ func (m *ResourceStatusInitiateManager) sendResourceStatusInitiatePerCell(nodebI
 	cells := enb.Enb.ServedCells
 
 	for index, cellInfo := range cells {
-		requestParams.CellID = cellInfo.CellId
+		requestParams.CellIdList = []string{cellInfo.CellId}
 		requestParams.MeasurementID = e2pdus.Measurement_ID(index + 1)
 
-		m.logger.Infof("#ResourceStatusInitiateManager.sendResourceStatusInitiatePerCell - RAN name: %s, Going to send request for cell id %s, measurement id %d", nodebInfo.RanName, requestParams.CellID, requestParams.MeasurementID)
+		m.logger.Infof("#ResourceStatusInitiateManager.sendResourceStatusInitiatePerCell - RAN name: %s, Going to send request for cell id %v, measurement id %d", nodebInfo.RanName, requestParams.CellIdList, requestParams.MeasurementID)
 
 		payload, payloadAsString, err := e2pdus.BuildPackedResourceStatusRequest(enums.Registration_Request_start, &requestParams, e2pdus.MaxAsn1PackedBufferSize, e2pdus.MaxAsn1CodecMessageBufferSize, m.logger.DebugEnabled())
 		if err != nil {
-			m.logger.Errorf("#ResourceStatusInitiateManager.sendResourceStatusInitiatePerCell - RAN name: %s. Failed to build and pack the resource status initiate request for cell id %s, measurement id %d. error: %s", nodebInfo.RanName, requestParams.CellID, requestParams.MeasurementID, err)
+			m.logger.Errorf("#ResourceStatusInitiateManager.sendResourceStatusInitiatePerCell - RAN name: %s. Failed to build and pack the resource status initiate request for cell id %v, measurement id %d. error: %s", nodebInfo.RanName, requestParams.CellIdList, requestParams.MeasurementID, err)
 			continue
 		}
 
-		m.logger.Debugf("#ResourceStatusInitiateManager.sendResourceStatusInitiatePerCell - RAN name: %s, cell id: %s, measurement id: %d, payload: %s", nodebInfo.RanName, requestParams.CellID, requestParams.MeasurementID, payloadAsString)
+		m.logger.Debugf("#ResourceStatusInitiateManager.sendResourceStatusInitiatePerCell - RAN name: %s, cell id: %v, measurement id: %d, payload: %s", nodebInfo.RanName, requestParams.CellIdList, requestParams.MeasurementID, payloadAsString)
 
 		rmrMsg := models.NewRmrMessage(rmrcgo.RicResStatusReq, nodebInfo.RanName, payload)
 		go m.rmrSender.Send(rmrMsg)
