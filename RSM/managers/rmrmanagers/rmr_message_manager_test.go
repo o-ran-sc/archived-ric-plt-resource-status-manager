@@ -20,8 +20,8 @@ import (
 	"rsm/configuration"
 	"rsm/converters"
 	"rsm/e2pdus"
-	"rsm/managers"
 	"rsm/rmrcgo"
+	"rsm/services"
 	"rsm/tests/testhelper"
 	"testing"
 )
@@ -30,9 +30,9 @@ func TestRmrMessageManagerSuccess(t *testing.T) {
 
 	rnibDataService, rmrSender, logger := testhelper.InitTestCase(t)
 	config, _ := configuration.ParseConfiguration()
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
 	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
-	manager := NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+	manager := NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	xactionByteArr := []byte("1111111")
 	payloadByteArr := []byte("payload")
@@ -45,9 +45,9 @@ func TestRmrMessageManagerFailure(t *testing.T) {
 
 	rnibDataService, rmrSender, logger := testhelper.InitTestCase(t)
 	config, _ := configuration.ParseConfiguration()
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
 	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
-	manager := NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+	manager := NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	xactionByteArr := []byte("1111111")
 	payloadByteArr := []byte("payload")

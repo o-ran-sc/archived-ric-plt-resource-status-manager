@@ -49,9 +49,12 @@ func InitTestCase(t *testing.T) (services.RNibDataService, *rmrsender.RmrSender,
 		t.Errorf("#tests.InitTestCase - failed to parse configuration, error: %s", err)
 	}
 
-	readerMock := &mocks.RnibReaderMock{}
+	rnibReaderMock := &mocks.RnibReaderMock{}
+
+	rsmReaderMock := &mocks.RsmReaderMock{}
+	rsmWriterMock := &mocks.RsmWriterMock{}
 
 	rmrSender := InitRmrSender(&mocks.RmrMessengerMock{}, logger)
-	rnibDataService := services.NewRnibDataService(logger, config, readerMock)
+	rnibDataService := services.NewRnibDataService(logger, config, rnibReaderMock, rsmReaderMock, rsmWriterMock)
 	return rnibDataService, rmrSender, logger
 }

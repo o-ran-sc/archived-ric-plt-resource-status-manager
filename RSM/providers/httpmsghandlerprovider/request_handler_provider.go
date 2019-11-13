@@ -46,8 +46,7 @@ func NewRequestHandlerProvider(logger *logger.Logger, rmrSender *rmrsender.RmrSe
 
 func initRequestHandlerMap(logger *logger.Logger, rmrSender *rmrsender.RmrSender, config *configuration.Configuration, rNibDataService services.RNibDataService) map[IncomingRequest]*httpmsghandlers.RequestHandler {
 
-	return map[IncomingRequest]*httpmsghandlers.RequestHandler{
-	}
+	return map[IncomingRequest]*httpmsghandlers.RequestHandler{}
 }
 
 func (provider RequestHandlerProvider) GetHandler(requestType IncomingRequest) (*httpmsghandlers.RequestHandler, error) {

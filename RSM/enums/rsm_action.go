@@ -15,18 +15,12 @@
 // limitations under the License.
 //
 
-package mocks
 
-import (
-	"github.com/stretchr/testify/mock"
-	"rsm/e2pdus"
+package enums
+
+type RsmAction string
+
+const (
+	Start RsmAction = "start"
+	Stop  RsmAction = "stop"
 )
-
-type ResourceStatusInitiateManagerMock struct {
-	mock.Mock
-}
-
-func (m *ResourceStatusInitiateManagerMock) Execute(inventoryName string, resourceStatusInitiateRequestParams *e2pdus.ResourceStatusRequestData) error {
-	args := m.Called(inventoryName, resourceStatusInitiateRequestParams)
-	return args.Error(0)
-}

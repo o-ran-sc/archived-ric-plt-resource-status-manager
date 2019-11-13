@@ -75,9 +75,9 @@ func TestInitInfoLoggerFailure(t *testing.T) {
 	assert.Nil(t, log)
 }
 
-func TestSyncSuccess(t *testing.T){
+func TestSyncSuccess(t *testing.T) {
 	logFile, err := os.Create("./loggerTest.txt")
-	if err != nil{
+	if err != nil {
 		t.Errorf("logger_test.TestSyncSuccess - failed to create file, error: %s", err)
 	}
 	old := os.Stdout
@@ -91,7 +91,7 @@ func TestSyncSuccess(t *testing.T){
 
 	os.Stdout = old
 	logFile, err = os.Open("./loggerTest.txt")
-	if err != nil{
+	if err != nil {
 		t.Errorf("logger_test.TestSyncSuccess - failed to open file, error: %s", err)
 	}
 	var buf bytes.Buffer
@@ -99,8 +99,8 @@ func TestSyncSuccess(t *testing.T){
 	if err != nil {
 		t.Errorf("logger_test.TestSyncSuccess - failed to copy bytes, error: %s", err)
 	}
-	debugRecord,_ :=buf.ReadString('\n')
-	errorRecord,_ :=buf.ReadString('\n')
+	debugRecord, _ := buf.ReadString('\n')
+	errorRecord, _ := buf.ReadString('\n')
 
 	assert.NotEmpty(t, debugRecord)
 	assert.Empty(t, errorRecord)
@@ -111,78 +111,78 @@ func TestSyncSuccess(t *testing.T){
 
 }
 
-func TestSyncFailure(t *testing.T){
+func TestSyncFailure(t *testing.T) {
 	log, err := InitLogger(DebugLevel)
 	err = log.Sync()
 	assert.NotNil(t, err)
 }
 
-func TestDebugEnabledFalse(t *testing.T){
+func TestDebugEnabledFalse(t *testing.T) {
 	entryNum, log := countRecords(InfoLevel, t)
 	assert.False(t, log.DebugEnabled())
-	assert.Equal(t,3, entryNum)
+	assert.Equal(t, 3, entryNum)
 }
 
-func TestDebugEnabledTrue(t *testing.T){
+func TestDebugEnabledTrue(t *testing.T) {
 	entryNum, log := countRecords(DebugLevel, t)
 	assert.True(t, log.DebugEnabled())
-	assert.Equal(t,4, entryNum)
+	assert.Equal(t, 4, entryNum)
 }
 
-func TestDPanicfDebugLevel(t *testing.T){
-	assert.True(t,validateRecordExists(DebugLevel, zap.DPanicLevel, t))
+func TestDPanicfDebugLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(DebugLevel, zap.DPanicLevel, t))
 }
 
-func TestDPanicfInfoLevel(t *testing.T){
-	assert.True(t,validateRecordExists(InfoLevel, zap.DPanicLevel, t))
+func TestDPanicfInfoLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(InfoLevel, zap.DPanicLevel, t))
 }
 
-func TestErrorfDebugLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(DebugLevel, zap.ErrorLevel, t))
+func TestErrorfDebugLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(DebugLevel, zap.ErrorLevel, t))
 }
 
-func TestErrorfInfoLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(InfoLevel, zap.ErrorLevel, t))
+func TestErrorfInfoLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(InfoLevel, zap.ErrorLevel, t))
 }
 
-func TestInfofDebugLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(DebugLevel, zap.InfoLevel, t))
+func TestInfofDebugLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(DebugLevel, zap.InfoLevel, t))
 }
 
-func TestInfofInfoLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(InfoLevel, zap.InfoLevel, t))
+func TestInfofInfoLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(InfoLevel, zap.InfoLevel, t))
 }
 
-func TestDebugfDebugLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(DebugLevel, zap.DebugLevel, t))
+func TestDebugfDebugLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(DebugLevel, zap.DebugLevel, t))
 }
 
-func TestDebugfInfoLevel(t *testing.T)  {
-	assert.False(t,validateRecordExists(InfoLevel, zap.DebugLevel, t))
+func TestDebugfInfoLevel(t *testing.T) {
+	assert.False(t, validateRecordExists(InfoLevel, zap.DebugLevel, t))
 }
 
-func TestInfofFatalLevel(t *testing.T)  {
-	assert.False(t,validateRecordExists(FatalLevel, zap.InfoLevel, t))
+func TestInfofFatalLevel(t *testing.T) {
+	assert.False(t, validateRecordExists(FatalLevel, zap.InfoLevel, t))
 }
 
-func TestDebugfFatalLevel(t *testing.T)  {
-	assert.False(t,validateRecordExists(FatalLevel, zap.DebugLevel, t))
+func TestDebugfFatalLevel(t *testing.T) {
+	assert.False(t, validateRecordExists(FatalLevel, zap.DebugLevel, t))
 }
 
-func TestWarnfWarnLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(WarnLevel, zap.WarnLevel, t))
+func TestWarnfWarnLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(WarnLevel, zap.WarnLevel, t))
 }
 
-func TestWarnfDebugLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(DebugLevel, zap.WarnLevel, t))
+func TestWarnfDebugLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(DebugLevel, zap.WarnLevel, t))
 }
 
-func TestWarnfInfoLevel(t *testing.T)  {
-	assert.True(t,validateRecordExists(InfoLevel, zap.WarnLevel, t))
+func TestWarnfInfoLevel(t *testing.T) {
+	assert.True(t, validateRecordExists(InfoLevel, zap.WarnLevel, t))
 }
 
-func TestWarnfFatalLevel(t *testing.T)  {
-	assert.False(t,validateRecordExists(FatalLevel, zap.WarnLevel, t))
+func TestWarnfFatalLevel(t *testing.T) {
+	assert.False(t, validateRecordExists(FatalLevel, zap.WarnLevel, t))
 }
 
 func TestLogLevelTokenToLevel(t *testing.T) {
@@ -219,9 +219,9 @@ func TestLogLevelTokenToLevel(t *testing.T) {
 	assert.True(t, level > FatalLevel)
 
 }
-func countRecords(logLevel LogLevel, t *testing.T) (int, *Logger){
+func countRecords(logLevel LogLevel, t *testing.T) (int, *Logger) {
 	old := os.Stdout
-	r, w, _ :=os.Pipe()
+	r, w, _ := os.Pipe()
 	os.Stdout = w
 	log, err := InitLogger(logLevel)
 	if err != nil {
@@ -242,24 +242,24 @@ func countRecords(logLevel LogLevel, t *testing.T) (int, *Logger){
 		t.Errorf("logger_test.TestSyncFailure - failed to copy bytes, error: %s", err)
 	}
 	entryNum := 0
-	s,_:= buf.ReadString('\n')
-	for len(s) > 0{
-		entryNum +=1
-		s,_= buf.ReadString('\n')
+	s, _ := buf.ReadString('\n')
+	for len(s) > 0 {
+		entryNum += 1
+		s, _ = buf.ReadString('\n')
 	}
 	return entryNum, log
 }
 
 func validateRecordExists(logLevel LogLevel, recordLevel zapcore.Level, t *testing.T) bool {
 	old := os.Stdout
-	r, w, _ :=os.Pipe()
+	r, w, _ := os.Pipe()
 	os.Stdout = w
 	log, err := InitLogger(logLevel)
 	if err != nil {
 		t.Errorf("logger_test.TestSyncFailure - failed to initialize logger, error: %s", err)
 	}
-	switch recordLevel{
-	case  zap.DebugLevel:
+	switch recordLevel {
+	case zap.DebugLevel:
 		log.Debugf("%v, %v, %v", 1, "abc", 0.1)
 	case zap.InfoLevel:
 		log.Infof("%v, %v, %v", 1, "abc", 0.1)
@@ -281,10 +281,10 @@ func validateRecordExists(logLevel LogLevel, recordLevel zapcore.Level, t *testi
 		t.Errorf("logger_test.TestSyncFailure - failed to copy bytes, error: %s", err)
 	}
 	entryNum := 0
-	s,_:= buf.ReadString('\n')
-	for len(s) > 0{
-		entryNum +=1
-		s,_= buf.ReadString('\n')
+	s, _ := buf.ReadString('\n')
+	for len(s) > 0 {
+		entryNum += 1
+		s, _ = buf.ReadString('\n')
 	}
 	return entryNum == 1
 }

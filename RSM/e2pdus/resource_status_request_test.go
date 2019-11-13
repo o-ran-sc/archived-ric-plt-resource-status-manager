@@ -15,6 +15,7 @@
  *   limitations under the License.
  *
  *******************************************************************************/
+
 package e2pdus
 
 import (
@@ -25,8 +26,8 @@ import (
 )
 
 /*
- * Create and pack an x2ap setup request.
- * Verify the packed representation matches the want value.
+* Create and pack an x2ap setup request.
+* Verify the packed representation matches the want value.
  */
 func TestBuildPackedResourceStatusRequest(t *testing.T) {
 	var testCases = []struct {
@@ -230,7 +231,7 @@ func TestBuildPackedResourceStatusInvalidPeriodicity(t *testing.T) {
 }
 
 func TestBuildPackedResourceStatusTooManyCells(t *testing.T) {
-	request := 	ResourceStatusRequestData{
+	request := ResourceStatusRequestData{
 		CellIdList: []string{
 			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",
 			"0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000", "0a0b0c:abcd8000", "0b0c0d:acde8000",

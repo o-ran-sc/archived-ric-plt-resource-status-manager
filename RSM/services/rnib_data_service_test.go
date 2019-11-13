@@ -46,12 +46,14 @@ func setupRnibDataServiceTestWithMaxAttempts(t *testing.T, maxAttempts int) (*rN
 	}
 	config.Rnib.MaxRnibConnectionAttempts = maxAttempts
 
-	readerMock := &mocks.RnibReaderMock{}
+	rnibReaderMock := &mocks.RnibReaderMock{}
+	rsmReaderMock := &mocks.RsmReaderMock{}
+	rsmWriterMock := &mocks.RsmWriterMock{}
 
-	rnibDataService := NewRnibDataService(logger, config, readerMock)
+	rnibDataService := NewRnibDataService(logger, config, rnibReaderMock, rsmReaderMock, rsmWriterMock)
 	assert.NotNil(t, rnibDataService)
 
-	return rnibDataService, readerMock
+	return rnibDataService, rnibReaderMock
 }
 
 func TestSuccessfulGetNodeb(t *testing.T) {
@@ -77,7 +79,7 @@ func TestConnFailureGetNodeb(t *testing.T) {
 
 	res, err := rnibDataService.GetNodeb(invName)
 	readerMock.AssertNumberOfCalls(t, "GetNodeb", 3)
-	assert.True(t, strings.Contains(err.Error(), "connection error", ))
+	assert.True(t, strings.Contains(err.Error(), "connection error"))
 	assert.Equal(t, nodeb, res)
 }
 
@@ -102,7 +104,7 @@ func TestConnFailureGetNodebIdList(t *testing.T) {
 
 	res, err := rnibDataService.GetListNodebIds()
 	readerMock.AssertNumberOfCalls(t, "GetListNodebIds", 3)
-	assert.True(t, strings.Contains(err.Error(), "connection error", ))
+	assert.True(t, strings.Contains(err.Error(), "connection error"))
 	assert.Equal(t, nodeIds, res)
 }
 
@@ -118,12 +120,12 @@ func TestConnFailureTwiceGetNodebIdList(t *testing.T) {
 
 	res, err := rnibDataService.GetListNodebIds()
 	readerMock.AssertNumberOfCalls(t, "GetListNodebIds", 3)
-	assert.True(t, strings.Contains(err.Error(), "connection error", ))
+	assert.True(t, strings.Contains(err.Error(), "connection error"))
 	assert.Equal(t, nodeIds, res)
 
 	res2, err := rnibDataService.GetNodeb(invName)
 	readerMock.AssertNumberOfCalls(t, "GetNodeb", 3)
-	assert.True(t, strings.Contains(err.Error(), "connection error", ))
+	assert.True(t, strings.Contains(err.Error(), "connection error"))
 	assert.Equal(t, nodeb, res2)
 }
 
@@ -136,7 +138,7 @@ func TestConnFailureWithAnotherConfig(t *testing.T) {
 
 	res, err := rnibDataService.GetListNodebIds()
 	readerMock.AssertNumberOfCalls(t, "GetListNodebIds", 5)
-	assert.True(t, strings.Contains(err.Error(), "connection error", ))
+	assert.True(t, strings.Contains(err.Error(), "connection error"))
 	assert.Equal(t, nodeIds, res)
 }
 

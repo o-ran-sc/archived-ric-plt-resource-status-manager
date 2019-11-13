@@ -23,7 +23,7 @@ import (
 	"rsm/converters"
 	"rsm/e2pdus"
 	"rsm/handlers/rmrmsghandlers"
-	"rsm/managers"
+	"rsm/services"
 	"rsm/tests/testhelper"
 	"strings"
 	"testing"
@@ -41,18 +41,18 @@ func TestGetNotificationHandlerSuccess(t *testing.T) {
 	if err != nil {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
 	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	var testCases = []struct {
 		msgType int
 		handler rmrmsghandlers.RmrMessageHandler
 	}{
-		{rmrcgo.RanConnected, rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, config, resourceStatusInitiateManager, RanConnected)},
-		{rmrcgo.RanRestarted, rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, config, resourceStatusInitiateManager, RanRestarted)},
+		{rmrcgo.RanConnected, rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, rnibDataService, resourceStatusService, RanConnected)},
+		{rmrcgo.RanRestarted, rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, rnibDataService, resourceStatusService, RanRestarted)},
 	}
 
 	for _, tc := range testCases {
-		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 		t.Run(fmt.Sprintf("%d", tc.msgType), func(t *testing.T) {
 			handler, err := provider.GetMessageHandler(tc.msgType)
 			if err != nil {
@@ -76,7 +76,7 @@ func TestGetNotificationHandlerFailure(t *testing.T) {
 	if err != nil {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
 	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 
 	var testCases = []struct {
@@ -86,7 +86,7 @@ func TestGetNotificationHandlerFailure(t *testing.T) {
 		{9999 /*unknown*/, "notification handler not found"},
 	}
 	for _, tc := range testCases {
-		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+		provider := NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 		t.Run(fmt.Sprintf("%d", tc.msgType), func(t *testing.T) {
 			_, err := provider.GetMessageHandler(tc.msgType)
 			if err == nil {

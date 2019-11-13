@@ -66,9 +66,10 @@ import (
 	"fmt"
 	"unsafe"
 )
+
 const PackedBufferSize = 4096
 
-func BuildPackedX2ResetResponse()([]byte, error){
+func BuildPackedX2ResetResponse() ([]byte, error) {
 	payloadSize := C.ulong(PackedBufferSize)
 	packedBuffer := [PackedBufferSize]C.uchar{}
 	errorBuffer := [PackedBufferSize]C.char{}

@@ -18,5 +18,4 @@
 package models
 
 type Request interface {
-
 }

@@ -21,7 +21,6 @@ import (
 	"rsm/configuration"
 	"rsm/converters"
 	"rsm/logger"
-	"rsm/managers"
 	"rsm/models"
 	"rsm/providers/rmrmsghandlerprovider"
 	"rsm/rmrcgo"
@@ -35,12 +34,12 @@ type RmrMessageManager struct {
 	handlerProvider *rmrmsghandlerprovider.MessageHandlerProvider
 }
 
-func NewRmrMessageManager(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) *RmrMessageManager {
-	handlerProvider := rmrmsghandlerprovider.NewMessageHandlerProvider(logger,config, rnibDataService, rmrSender, resourceStatusInitiateManager, rsConverter, rsFailureConverter)
+func NewRmrMessageManager(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusService *services.ResourceStatusService, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) *RmrMessageManager {
+	handlerProvider := rmrmsghandlerprovider.NewMessageHandlerProvider(logger, config, rnibDataService, rmrSender, resourceStatusService, rsConverter, rsFailureConverter)
 
 	return &RmrMessageManager{
 		handlerProvider: handlerProvider,
-		logger: logger,
+		logger:          logger,
 	}
 }
 

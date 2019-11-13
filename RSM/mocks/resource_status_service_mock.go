@@ -18,15 +18,16 @@
 package mocks
 
 import (
+	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities"
 	"github.com/stretchr/testify/mock"
-	"rsm/e2pdus"
+	"rsm/models"
 )
 
-type ResourceStatusInitiateManagerMock struct {
+type ResourceStatusServiceMock struct {
 	mock.Mock
 }
 
-func (m *ResourceStatusInitiateManagerMock) Execute(inventoryName string, resourceStatusInitiateRequestParams *e2pdus.ResourceStatusRequestData) error {
-	args := m.Called(inventoryName, resourceStatusInitiateRequestParams)
+func (m *ResourceStatusServiceMock) BuildAndSendInitiateRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64) error {
+	args := m.Called(nodeb, config, enb1MeasurementId)
 	return args.Error(0)
 }

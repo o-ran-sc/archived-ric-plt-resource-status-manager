@@ -23,10 +23,10 @@ import (
 	"rsm/converters"
 	"rsm/e2pdus"
 	"rsm/logger"
-	"rsm/managers"
 	"rsm/managers/rmrmanagers"
 	"rsm/mocks"
 	"rsm/rmrcgo"
+	"rsm/services"
 	"rsm/tests"
 	"rsm/tests/testhelper"
 	"testing"
@@ -57,11 +57,11 @@ func initRmrReceiver(t *testing.T) *RmrReceiver {
 	if err != nil {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
 
 	rmrMessenger := initRmrMessenger(logger)
 	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
-	manager := rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+	manager := rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	return NewRmrReceiver(logger, rmrMessenger, manager)
 }

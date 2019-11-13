@@ -18,73 +18,120 @@ package rmrmsghandlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities"
-	"rsm/configuration"
-	"rsm/e2pdus"
+	"rsm/enums"
 	"rsm/logger"
-	"rsm/managers"
 	"rsm/models"
+	"rsm/services"
 )
 
 type ResourceStatusInitiateNotificationHandler struct {
-	logger                        *logger.Logger
-	config                        *configuration.Configuration
-	resourceStatusInitiateManager managers.IResourceStatusInitiateManager
-	requestName                   string
+	logger                *logger.Logger
+	rnibDataService       services.RNibDataService
+	resourceStatusService services.IResourceStatusService
+	requestName           string
 }
 
-func NewResourceStatusInitiateNotificationHandler(logger *logger.Logger, config *configuration.Configuration, resourceStatusInitiateManager managers.IResourceStatusInitiateManager, requestName string) ResourceStatusInitiateNotificationHandler {
+func NewResourceStatusInitiateNotificationHandler(logger *logger.Logger, rnibDataService services.RNibDataService, resourceStatusService services.IResourceStatusService, requestName string) ResourceStatusInitiateNotificationHandler {
 	return ResourceStatusInitiateNotificationHandler{
-		logger:                        logger,
-		config:                        config,
-		resourceStatusInitiateManager: resourceStatusInitiateManager,
-		requestName:                   requestName,
+		logger:                logger,
+		rnibDataService:       rnibDataService,
+		resourceStatusService: resourceStatusService,
+		requestName:           requestName,
 	}
+}
+
+func (h ResourceStatusInitiateNotificationHandler) UnmarshalResourceStatusPayload(inventoryName string, payload []byte) (*models.ResourceStatusPayload, error) {
+	unmarshalledPayload := models.ResourceStatusPayload{}
+	err := json.Unmarshal(payload, &unmarshalledPayload)
+
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.UnmarshalResourceStatusPayload - RAN name: %s - Error unmarshaling RMR request payload: %v", inventoryName, err)
+		return nil, err
+	}
+
+	if unmarshalledPayload.NodeType == entities.Node_UNKNOWN {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.UnmarshalResourceStatusPayload - RAN name: %s - Unknown Node Type", inventoryName)
+		return nil, fmt.Errorf("unknown node type for RAN %s", inventoryName)
+	}
+
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.UnmarshalResourceStatusPayload - Unmarshaled payload successfully: %+v", payload)
+	return &unmarshalledPayload, nil
+
+}
+
+func (h ResourceStatusInitiateNotificationHandler) SaveRsmRanInfoStopTrue(inventoryName string) {
+	rsmRanInfo := models.NewRsmRanInfo(inventoryName, 0, 0, enums.Stop, true)
+	err := h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
+
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.SaveRsmRanInfoStopTrue - RAN name: %s - Failed saving RSM data", inventoryName)
+		return
+	}
+
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.SaveRsmRanInfoStopTrue - RAN name: %s - Successfully saved RSM data", inventoryName)
+
 }
 
 func (h ResourceStatusInitiateNotificationHandler) Handle(request *models.RmrRequest) {
 	inventoryName := request.RanName
-	h.logger.Infof("#ResourceStatusInitiateNotificationHandler - RAN name: %s - Received %s notification", inventoryName, h.requestName)
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Received %s notification", inventoryName, h.requestName)
 
-	if !isResourceStatusEnabled(h.config) {
-		h.logger.Warnf("#ResourceStatusInitiateNotificationHandler - RAN name: %s - resource status is disabled", inventoryName)
-		return
-	}
-
-	payload := models.ResourceStatusPayload{}
-	err := json.Unmarshal(request.Payload, &payload)
+	payload, err := h.UnmarshalResourceStatusPayload(inventoryName, request.Payload)
 
 	if err != nil {
-		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler - RAN name: %s - Error unmarshaling RMR request payload: %v", inventoryName, err)
 		return
 	}
-
-	h.logger.Infof("#ResourceStatusInitiateNotificationHandler - Unmarshaled payload successfully: %+v", payload)
 
 	if payload.NodeType != entities.Node_ENB {
-		h.logger.Debugf("#ResourceStatusInitiateNotificationHandler - RAN name: %s, Node type isn't ENB", inventoryName)
+		h.logger.Debugf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s, Node type isn't ENB", inventoryName)
 		return
 	}
 
-	resourceStatusInitiateRequestParams := &e2pdus.ResourceStatusRequestData{}
-	populateResourceStatusInitiateRequestParams(resourceStatusInitiateRequestParams, h.config)
+	nodeb, err := h.rnibDataService.GetNodeb(inventoryName)
 
-	_ = h.resourceStatusInitiateManager.Execute(inventoryName, resourceStatusInitiateRequestParams)
-}
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Error fetching RAN from rNib: %v", inventoryName, err)
+		return
+	}
 
-func isResourceStatusEnabled(configuration *configuration.Configuration) bool {
-	return configuration.ResourceStatusParams.EnableResourceStatus
-}
+	nodebConnectionStatus := nodeb.GetConnectionStatus()
 
-func populateResourceStatusInitiateRequestParams(params *e2pdus.ResourceStatusRequestData, config *configuration.Configuration) {
-	params.PartialSuccessAllowed = config.ResourceStatusParams.PartialSuccessAllowed
-	params.PrbPeriodic = config.ResourceStatusParams.PrbPeriodic
-	params.TnlLoadIndPeriodic = config.ResourceStatusParams.TnlLoadIndPeriodic
-	params.HwLoadIndPeriodic = config.ResourceStatusParams.HwLoadIndPeriodic
-	params.AbsStatusPeriodic = config.ResourceStatusParams.AbsStatusPeriodic
-	params.RsrpMeasurementPeriodic = config.ResourceStatusParams.RsrpMeasurementPeriodic
-	params.CsiPeriodic = config.ResourceStatusParams.CsiPeriodic
-	params.PeriodicityMS = config.ResourceStatusParams.PeriodicityMs
-	params.PeriodicityRsrpMeasurementMS = config.ResourceStatusParams.PeriodicityRsrpMeasurementMs
-	params.PeriodicityCsiMS = config.ResourceStatusParams.PeriodicityCsiMs
+	if nodebConnectionStatus != entities.ConnectionStatus_CONNECTED {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - RAN's connection status isn't CONNECTED", inventoryName)
+		//h.SaveRsmRanInfoStopTrue(inventoryName)
+		return
+	}
+
+	config, err := h.rnibDataService.GetRsmGeneralConfiguration()
+
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Failed retrieving RSM general configuration", inventoryName)
+		return
+	}
+
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Successfully retrieved RSM general configuration", inventoryName)
+
+	if !config.EnableResourceStatus {
+		h.SaveRsmRanInfoStopTrue(inventoryName)
+		return
+	}
+
+	rsmRanInfo := models.NewRsmRanInfo(inventoryName, enums.Enb1MeasurementId, 0, enums.Start, false)
+	err = h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
+
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Failed saving RSM data", inventoryName)
+		return
+	}
+
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Successfully saved RSM data", inventoryName)
+
+	err = h.resourceStatusService.BuildAndSendInitiateRequest(nodeb, config, rsmRanInfo.Enb1MeasurementId)
+
+	if err != nil {
+		h.SaveRsmRanInfoStopTrue(inventoryName)
+		return
+	}
 }

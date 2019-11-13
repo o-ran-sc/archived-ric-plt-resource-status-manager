@@ -33,7 +33,7 @@ const (
 	maxFailedMeasObjects = 32
 )
 
-type  IResourceStatusResponseConverter interface {
+type IResourceStatusResponseConverter interface {
 	Convert(packedBuf []byte) (*models.ResourceStatusResponse, error)
 	UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error)
 }
@@ -41,7 +41,6 @@ type  IResourceStatusResponseConverter interface {
 type ResourceStatusResponseConverter struct {
 	X2apPduUnpacker
 }
-
 
 func NewResourceStatusResponseConverter(unpacker X2apPduUnpacker) ResourceStatusResponseConverter {
 	return ResourceStatusResponseConverter{unpacker}
@@ -52,8 +51,6 @@ func buildCellId(cellId C.ECGI_t) string {
 	eutranCellIdentifier := C.GoBytes(unsafe.Pointer(cellId.eUTRANcellIdentifier.buf), C.int(cellId.eUTRANcellIdentifier.size))
 	return fmt.Sprintf("%x:%x", plmnId, eutranCellIdentifier)
 }
-
-
 
 func convertMeasurementFailureCauses(measurementFailureCause_List *C.MeasurementFailureCause_List_t, measurementInitiationResult *models.MeasurementInitiationResult) error {
 	var MeasurementFailureCauses []*models.MeasurementFailureCause
@@ -78,7 +75,6 @@ func convertMeasurementFailureCauses(measurementFailureCause_List *C.Measurement
 
 	return nil
 }
-
 
 func convertMeasurementInitiationResult(measurementInitiationResult_List *C.MeasurementInitiationResult_List_t) ([]*models.MeasurementInitiationResult, error) {
 	var measurementInitiationResults []*models.MeasurementInitiationResult

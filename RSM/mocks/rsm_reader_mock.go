@@ -2,7 +2,7 @@
 // Copyright 2019 AT&T Intellectual Property
 // Copyright 2019 Nokia
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -14,19 +14,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
 package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
-	"rsm/e2pdus"
+	"rsm/models"
 )
 
-type ResourceStatusInitiateManagerMock struct {
+type RsmReaderMock struct {
 	mock.Mock
 }
 
-func (m *ResourceStatusInitiateManagerMock) Execute(inventoryName string, resourceStatusInitiateRequestParams *e2pdus.ResourceStatusRequestData) error {
-	args := m.Called(inventoryName, resourceStatusInitiateRequestParams)
-	return args.Error(0)
+func (m *RsmReaderMock) GetRsmRanInfo(inventoryName string) (*models.RsmRanInfo, error) {
+	args := m.Called(inventoryName)
+	return args.Get(0).(*models.RsmRanInfo), args.Error(1)
+}
+
+func (m *RsmReaderMock) GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error) {
+	args := m.Called()
+	return args.Get(0).(*models.RsmGeneralConfiguration), args.Error(1)
 }

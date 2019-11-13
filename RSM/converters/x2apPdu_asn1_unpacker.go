@@ -29,13 +29,12 @@ import (
 )
 
 type X2apPduUnpacker struct {
-	logger *logger.Logger
+	logger               *logger.Logger
 	maxMessageBufferSize int
-
 }
 
 func NewX2apPduUnpacker(logger *logger.Logger, maxMessageBufferSize int) X2apPduUnpacker {
-	return X2apPduUnpacker{logger :logger, maxMessageBufferSize: maxMessageBufferSize}
+	return X2apPduUnpacker{logger: logger, maxMessageBufferSize: maxMessageBufferSize}
 }
 
 func (r X2apPduUnpacker) UnpackX2apPdu(packedBuf []byte) (*C.E2AP_PDU_t, error) {
@@ -60,7 +59,7 @@ func (r X2apPduUnpacker) UnpackX2apPdu(packedBuf []byte) (*C.E2AP_PDU_t, error) 
 	return pdu, nil
 }
 
-func (r X2apPduUnpacker)UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error) {
+func (r X2apPduUnpacker) UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error) {
 	pdu, err := r.UnpackX2apPdu(packedBuf)
 	if err != nil {
 		return "", err
@@ -72,6 +71,3 @@ func (r X2apPduUnpacker)UnpackX2apPduAsString(packedBuf []byte, maxMessageBuffer
 	C.asn1_pdu_printer(pdu, C.size_t(len(buf)), &buf[0])
 	return C.GoString(&buf[0]), nil
 }
-
-
-

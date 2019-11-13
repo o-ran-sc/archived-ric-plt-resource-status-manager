@@ -28,9 +28,9 @@ import (
 	"rsm/e2pdus"
 	"rsm/httpserver"
 	"rsm/logger"
-	"rsm/managers"
 	"rsm/managers/rmrmanagers"
 	"rsm/rmrcgo"
+	"rsm/rsmdb"
 	"rsm/services"
 	"rsm/services/rmrreceiver"
 	"rsm/services/rmrsender"
@@ -50,17 +50,21 @@ func main() {
 		os.Exit(1)
 	}
 	db := sdlgo.NewDatabase()
-	sdl := sdlgo.NewSdlInstance("e2Manager", db)
-	defer sdl.Close()
+	e2mSdl := sdlgo.NewSdlInstance("e2Manager", db)
+	rsmSdl := sdlgo.NewSdlInstance("rsm", db)
+
+	defer e2mSdl.Close()
+	defer rsmSdl.Close()
+
 	logger.Infof("#app.main - Configuration %s", config)
-	rnibDataService := services.NewRnibDataService(logger, config, reader.GetRNibReader(sdl))
+	rnibDataService := services.NewRnibDataService(logger, config, reader.GetRNibReader(e2mSdl), rsmdb.GetRsmReader(rsmSdl), rsmdb.GetRsmWriter(rsmSdl))
 	var msgImpl *rmrcgo.Context
 	rmrMessenger := msgImpl.Init(config.Rmr.ReadyIntervalSec, "tcp:"+strconv.Itoa(config.Rmr.Port), config.Rmr.MaxMsgSize, 0, logger)
 	rmrSender := rmrsender.NewRmrSender(logger, rmrMessenger)
 
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	unpacker := converters.NewX2apPduUnpacker(logger,e2pdus.MaxAsn1CodecMessageBufferSize)
-	var rmrManager = rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
+	var rmrManager = rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	rmrReceiver := rmrreceiver.NewRmrReceiver(logger, rmrMessenger, rmrManager)
 	defer rmrMessenger.Close()

@@ -248,7 +248,7 @@ func TestResourceStatusResponseConverterPduOfFailure(t *testing.T) {
 
 func TestResourceStatusResponseConverterWrongPdu(t *testing.T) {
 	logger, _ := logger.InitLogger(logger.InfoLevel)
-	unpacker := NewX2apPduUnpacker(logger,e2pdus.MaxAsn1CodecMessageBufferSize)
+	unpacker := NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
 	rsConverters := NewResourceStatusResponseConverter(unpacker)
 
 	wantError := "unexpected PDU - not a resource status response"

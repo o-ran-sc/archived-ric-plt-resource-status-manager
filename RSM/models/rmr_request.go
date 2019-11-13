@@ -20,10 +20,10 @@ package models
 import "time"
 
 type RmrRequest struct {
-	RanName       string
-	Len           int
-	Payload       []byte
-	StartTime     time.Time
+	RanName   string
+	Len       int
+	Payload   []byte
+	StartTime time.Time
 }
 
 func NewRmrRequest(ranName string, payload []byte, startTime time.Time) *RmrRequest {

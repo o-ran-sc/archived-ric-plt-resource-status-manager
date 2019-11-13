@@ -72,10 +72,10 @@ func TestParseConfigurationFileNotFoundFailure(t *testing.T) {
 
 func TestRmrConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"logging":         map[string]interface{}{"logLevel": "info"},
-		"http":            map[string]interface{}{"port": 631},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
-		"rnib":            map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
@@ -86,10 +86,10 @@ func TestRmrConfigNotFoundFailure(t *testing.T) {
 
 func TestLoggingConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"rmr":             map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"http":            map[string]interface{}{"port": 631},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"http":                 map[string]interface{}{"port": 631},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
-		"rnib":            map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
@@ -100,10 +100,10 @@ func TestLoggingConfigNotFoundFailure(t *testing.T) {
 
 func TestHttpConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"rmr":             map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging":         map[string]interface{}{"logLevel": "info"},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
-		"rnib":            map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
@@ -114,9 +114,9 @@ func TestHttpConfigNotFoundFailure(t *testing.T) {
 
 func TestRnibConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"rmr":             map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging":         map[string]interface{}{"logLevel": "info"},
-		"http":            map[string]interface{}{"port": 631},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
@@ -144,10 +144,10 @@ func TestResourceStatusParamsConfigNotFoundFailure(t *testing.T) {
 func TestCharacteristicsConfigInvalidPeriodicityMs(t *testing.T) {
 
 	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityMs": 50, "periodicityRsrpMeasurementMs": 480, "periodicityCsiMs": 20},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
@@ -160,10 +160,10 @@ func TestCharacteristicsConfigInvalidPeriodicityMs(t *testing.T) {
 func TestResourceStatusParamsConfigInvalidPeriodicityRsrpMeasurementMs(t *testing.T) {
 
 	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityMs": 1000, "periodicityRsrpMeasurementMs": 50, "periodicityCsiMs": 20},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
@@ -176,10 +176,10 @@ func TestResourceStatusParamsConfigInvalidPeriodicityRsrpMeasurementMs(t *testin
 func TestResourceStatusParamsConfigInvalidPeriodicityCsiMs(t *testing.T) {
 
 	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityMs": 1000, "periodicityRsrpMeasurementMs": 480, "periodicityCsiMs": 50},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)

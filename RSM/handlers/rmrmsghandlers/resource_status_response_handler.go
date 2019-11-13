@@ -38,6 +38,7 @@ func NewResourceStatusResponseHandler(logger *logger.Logger, converter converter
 
 func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 	h.logger.Infof("#ResourceStatusResponseHandler.Handle - RAN name: %s - Received resource status response notification", request.RanName)
+
 	if h.logger.DebugEnabled() {
 		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
 		if err != nil {
@@ -46,11 +47,14 @@ func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 		}
 		h.logger.Debugf("#ResourceStatusResponseHandler.Handle - RAN name: %s - pdu: %s", request.RanName, pduAsString)
 	}
+
 	response, err := h.converter.Convert(request.Payload)
+
 	if err != nil {
 		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
 		return
 	}
+
 	if response.ENB2_Measurement_ID == 0 {
 		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - ignoring response without ENB2_Measurement_ID for ENB1_Measurement_ID = %d", request.RanName, response.ENB1_Measurement_ID)
 		return

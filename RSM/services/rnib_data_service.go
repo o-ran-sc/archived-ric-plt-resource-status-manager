@@ -24,29 +24,75 @@ import (
 	"net"
 	"rsm/configuration"
 	"rsm/logger"
+	"rsm/models"
+	"rsm/rsmdb"
 	"time"
 )
 
 type RNibDataService interface {
+	GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error)
+	GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error)
+	SaveRsmRanInfo(rsmData *models.RsmRanInfo) error
 	GetNodeb(ranName string) (*entities.NodebInfo, error)
 	GetListNodebIds() ([]*entities.NbIdentity, error)
 	PingRnib() bool
 }
 
 type rNibDataService struct {
-	logger             *logger.Logger
-	rnibReader         reader.RNibReader
-	maxAttempts        int
-	retryInterval      time.Duration
+	logger        *logger.Logger
+	rnibReader    reader.RNibReader
+	rsmReader     rsmdb.RsmReader
+	rsmWriter     rsmdb.RsmWriter
+	maxAttempts   int
+	retryInterval time.Duration
 }
 
-func NewRnibDataService(logger *logger.Logger, config *configuration.Configuration, rnibReader reader.RNibReader) *rNibDataService {
+func NewRnibDataService(logger *logger.Logger, config *configuration.Configuration, rnibReader reader.RNibReader, rsmReader rsmdb.RsmReader, rsmWriter rsmdb.RsmWriter) *rNibDataService {
 	return &rNibDataService{
-		logger:             logger,
-		rnibReader:         rnibReader,
-		maxAttempts:        config.Rnib.MaxRnibConnectionAttempts,
-		retryInterval:      time.Duration(config.Rnib.RnibRetryIntervalMs) * time.Millisecond,
+		logger:        logger,
+		rnibReader:    rnibReader,
+		rsmReader:     rsmReader,
+		rsmWriter:     rsmWriter,
+		maxAttempts:   config.Rnib.MaxRnibConnectionAttempts,
+		retryInterval: time.Duration(config.Rnib.RnibRetryIntervalMs) * time.Millisecond,
 	}
+}
+
+func (w *rNibDataService) GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error) {
+	w.logger.Infof("#RnibDataService.GetRsmGeneralConfiguration")
+
+	var rsmGeneralConfiguration *models.RsmGeneralConfiguration = nil
+
+	err := w.retry("GetRsmGeneralConfiguration", func() (err error) {
+		rsmGeneralConfiguration, err = w.rsmReader.GetRsmGeneralConfiguration()
+		return
+	})
+
+	return rsmGeneralConfiguration, err
+}
+
+func (w *rNibDataService) GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error) {
+	w.logger.Infof("#RnibDataService.GetRsmRanInfo - RAN name: %s", ranName)
+
+	var rsmData *models.RsmRanInfo = nil
+
+	err := w.retry("GetRsmRanInfo", func() (err error) {
+		rsmData, err = w.rsmReader.GetRsmRanInfo(ranName)
+		return
+	})
+
+	return rsmData, err
+}
+
+func (w *rNibDataService) SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error {
+	w.logger.Infof("#RnibDataService.SaveRsmRanInfo - RAN name: %s", rsmRanInfo.RanName)
+
+	err := w.retry("SaveRsmRanInfo", func() (err error) {
+		err = w.rsmWriter.SaveRsmRanInfo(rsmRanInfo)
+		return
+	})
+
+	return err
 }
 
 func (w *rNibDataService) GetNodeb(ranName string) (*entities.NodebInfo, error) {

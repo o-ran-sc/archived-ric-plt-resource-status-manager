@@ -41,10 +41,12 @@ func setupRootControllerTest(t *testing.T) (services.RNibDataService, *mocks.Rni
 	if err != nil {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
-	readerMock := &mocks.RnibReaderMock{}
+	rnibReaderMock := &mocks.RnibReaderMock{}
+	rsmReaderMock := &mocks.RsmReaderMock{}
+	rsmWriterMock := &mocks.RsmWriterMock{}
 
-	rnibDataService := services.NewRnibDataService(logger, config, readerMock)
-	return rnibDataService, readerMock
+	rnibDataService := services.NewRnibDataService(logger, config, rnibReaderMock, rsmReaderMock, rsmWriterMock)
+	return rnibDataService, rnibReaderMock
 }
 
 func TestNewRequestController(t *testing.T) {

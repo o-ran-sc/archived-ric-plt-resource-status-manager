@@ -18,23 +18,23 @@
 package models
 
 import (
-	"rsm/logger"
+	"rsm/enums"
 )
 
-type RmrMessage struct {
-	MsgType int
-	RanName string
-	Payload []byte
+type RsmRanInfo struct {
+	RanName           string          `json:"ranName"`
+	Enb1MeasurementId int64           `json:"enb1MeasurementId"`
+	Enb2MeasurementId int64           `json:"enb2MeasurementId"`
+	Action            enums.RsmAction `json:"action"`
+	ActionStatus      bool            `json:"actionStatus"`
 }
 
-func NewRmrMessage(msgType int, ranName string, payload []byte) *RmrMessage {
-	return &RmrMessage{
-		MsgType: msgType,
-		RanName: ranName,
-		Payload: payload,
+func NewRsmRanInfo(ranName string, enb1MeasurementId int64, enb2MeasurementId int64, action enums.RsmAction, actionStatus bool) *RsmRanInfo {
+	return &RsmRanInfo{
+		RanName:           ranName,
+		Enb1MeasurementId: enb1MeasurementId,
+		Enb2MeasurementId: enb2MeasurementId,
+		Action:            action,
+		ActionStatus:      actionStatus,
 	}
-}
-
-func (response RmrMessage) GetMessageAsBytes(logger *logger.Logger) []byte {
-	return response.Payload
 }
