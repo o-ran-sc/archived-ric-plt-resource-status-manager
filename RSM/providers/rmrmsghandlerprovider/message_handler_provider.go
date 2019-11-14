@@ -49,7 +49,7 @@ func initMessageHandlersMap(logger *logger.Logger, config *configuration.Configu
 		rmrcgo.RanConnected:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, rnibDataService, resourceStatusService, RanConnected),
 		rmrcgo.RanRestarted:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, rnibDataService, resourceStatusService, RanRestarted),
 		rmrcgo.RicResStatusFailure: rmrmsghandlers.NewResourceStatusFailureHandler(logger, rsFailureConverter),
-		rmrcgo.RicResStatusResp:    rmrmsghandlers.NewResourceStatusResponseHandler(logger, rsConverter),
+		rmrcgo.RicResStatusResp:    rmrmsghandlers.NewResourceStatusResponseHandler(logger, rsConverter, rnibDataService),
 	}
 }
 

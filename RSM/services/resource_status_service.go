@@ -78,6 +78,11 @@ func (m *ResourceStatusService) extractCellIdList(nodeb *entities.NodebInfo) ([]
 
 	cells := enb.Enb.ServedCells
 
+	if len(cells) == 0 {
+		m.logger.Errorf("#ResourceStatusService.extractCellIdList - Empty cell list for RAN %s", nodeb.RanName)
+		return []string{}, fmt.Errorf("empty cell list for RAN %s", nodeb.RanName)
+	}
+
 	cellIdList := make([]string, len(cells))
 	for index, cellInfo := range cells {
 		cellIdList[index] = cellInfo.CellId

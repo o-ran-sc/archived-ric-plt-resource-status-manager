@@ -68,6 +68,10 @@ func (w *rNibDataService) GetRsmGeneralConfiguration() (*models.RsmGeneralConfig
 		return
 	})
 
+	if err != nil {
+		w.logger.Infof("#RnibDataService.GetRsmGeneralConfiguration - Configuration: %+v", rsmGeneralConfiguration)
+	}
+
 	return rsmGeneralConfiguration, err
 }
 
@@ -81,11 +85,17 @@ func (w *rNibDataService) GetRsmRanInfo(ranName string) (*models.RsmRanInfo, err
 		return
 	})
 
+	if err != nil {
+		w.logger.Infof("#RnibDataService.GetRsmRanInfo - RsmRanInfo: %+v", ranName)
+	}
+
+
+
 	return rsmData, err
 }
 
 func (w *rNibDataService) SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error {
-	w.logger.Infof("#RnibDataService.SaveRsmRanInfo - RAN name: %s", rsmRanInfo.RanName)
+	w.logger.Infof("#RnibDataService.SaveRsmRanInfo - RsmRanInfo: %+v", rsmRanInfo)
 
 	err := w.retry("SaveRsmRanInfo", func() (err error) {
 		err = w.rsmWriter.SaveRsmRanInfo(rsmRanInfo)
@@ -139,6 +149,7 @@ func (w *rNibDataService) retry(rnibFunc string, f func() error) (err error) {
 			return
 		}
 		if !isRnibConnectionError(err) {
+			w.logger.Errorf("#RnibDataService.retry - error in %s: %s", rnibFunc, err)
 			return err
 		}
 		if i >= attempts {

@@ -118,42 +118,8 @@ func TestHandleGnbNode(t *testing.T) {
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
 }
 
-func TestGetNodebFailure(t *testing.T) {
-	h, rnibReaderMock, resourceStatusServiceMock, _, _ := initRanConnectedNotificationHandlerTest(t, "RanConnected")
-	var nodebInfo *entities.NodebInfo
-
-	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
-	payload := []byte(payloadStr)
-	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
-
-	rnibReaderMock.On("GetNodeb", RanName).Return(nodebInfo, common.NewInternalError(errors.New("Error")))
-	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
-	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
-	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
-}
-
-func TestInvalidConnectionStatus(t *testing.T) {
-	h, rnibReaderMock, resourceStatusServiceMock, _/*rsmWriterMock*/, _ := initRanConnectedNotificationHandlerTest(t, "RanConnected")
-	var err error
-	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_DISCONNECTED}, err)
-	//rsmRanInfo := models.RsmRanInfo{RanName, 0, 0, enums.Stop, true}
-	//rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(err)
-
-	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
-	payload := []byte(payloadStr)
-	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
-	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
-	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
-	//rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
-	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
-}
-
 func TestGetRsmGeneralConfigurationFailure(t *testing.T) {
-	h, rnibReaderMock, resourceStatusServiceMock, _, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
-	var err error
-	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}, err)
+	h, _, resourceStatusServiceMock, _, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
 	var rgc models.RsmGeneralConfiguration
 	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(&rgc, common.NewInternalError(errors.New("Error")))
 	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
@@ -161,15 +127,13 @@ func TestGetRsmGeneralConfigurationFailure(t *testing.T) {
 	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
 	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
 	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
 }
 
 func TestEnableResourceStatusFalse(t *testing.T) {
-	h, rnibReaderMock, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
+	h, _, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
 	var err error
-	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}, err)
 	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(getRsmGeneralConfiguration(false), err)
 	rsmRanInfo := models.RsmRanInfo{RanName, 0, 0, enums.Stop, true}
 	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(err)
@@ -179,16 +143,14 @@ func TestEnableResourceStatusFalse(t *testing.T) {
 	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
 	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
 	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
 }
 
-func TestEnableResourceStatusFalseRsmRanInfoFailure(t *testing.T) {
-	h, rnibReaderMock, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
+func TestEnableResourceStatusFalseSaveRsmRanInfoFailure(t *testing.T) {
+	h, _, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
 	var err error
-	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}, err)
 	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(getRsmGeneralConfiguration(false), err)
 	rsmRanInfo := models.RsmRanInfo{RanName, 0, 0, enums.Stop, true}
 	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(common.NewInternalError(errors.New("Error")))
@@ -198,45 +160,84 @@ func TestEnableResourceStatusFalseRsmRanInfoFailure(t *testing.T) {
 	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
 	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
 	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
 }
 
+func TestGetNodebFailure(t *testing.T) {
+	h, rnibReaderMock, resourceStatusServiceMock, _, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
 
-func TestEnableResourceStatusTrueSaveRsmRanInfoFailure(t *testing.T) {
+	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
+	payload := []byte(payloadStr)
+	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
+
+	var err error
+	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(getRsmGeneralConfiguration(true), err)
+
+	var nodebInfo *entities.NodebInfo
+	rnibReaderMock.On("GetNodeb", RanName).Return(nodebInfo, common.NewInternalError(errors.New("Error")))
+	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
+	h.Handle(rmrReq)
+	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
+	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
+	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
+}
+
+func TestInvalidConnectionStatus(t *testing.T) {
 	h, rnibReaderMock, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
 	var err error
-	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}, err)
 	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(getRsmGeneralConfiguration(true), err)
-	rsmRanInfo := models.RsmRanInfo{RanName, enums.Enb1MeasurementId, 0, enums.Start, false}
-	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(common.NewInternalError(errors.New("Error")))
+	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_DISCONNECTED}, err)
+	rsmRanInfo := models.RsmRanInfo{RanName, 0, 0, enums.Stop, true}
+	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(err)
 
 	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
 	payload := []byte(payloadStr)
 	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
 	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
 	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
+	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
+	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
+	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
+}
+
+func TestEnableResourceStatusTrueSaveRsmRanInfoFailure(t *testing.T) {
+	h, rnibReaderMock, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
+
+	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
+	payload := []byte(payloadStr)
+	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
+
+	var err error
+	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(getRsmGeneralConfiguration(true), err)
+	rnibReaderMock.On("GetNodeb", RanName).Return(&entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}, err)
+	rsmRanInfo := models.RsmRanInfo{RanName, enums.Enb1MeasurementId, 0, enums.Start, false}
+	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(common.NewInternalError(errors.New("Error")))
+	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", mock.AnythingOfType("*entities.NodebInfo"), mock.AnythingOfType("*models.RsmGeneralConfiguration"), enums.Enb1MeasurementId).Return(nil)
+	h.Handle(rmrReq)
+	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
+	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 0)
 }
 
 func TestBuildAndSendSuccess(t *testing.T) {
 	h, rnibReaderMock, resourceStatusServiceMock, rsmWriterMock, rsmReaderMock := initRanConnectedNotificationHandlerTest(t, "RanConnected")
-	var err error
-	nodebInfo := &entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}
-	rgc := getRsmGeneralConfiguration(true)
-	rnibReaderMock.On("GetNodeb", RanName).Return(nodebInfo, err)
-	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(rgc, err)
-	rsmRanInfo := models.RsmRanInfo{RanName, enums.Enb1MeasurementId, 0, enums.Start, false}
-	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(err)
 
 	payloadStr := "{\"nodeType\":1, \"messageDirection\":1}"
 	payload := []byte(payloadStr)
 	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
+
+	var err error
+	rgc := getRsmGeneralConfiguration(true)
+	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(rgc, err)
+	nodebInfo := &entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}
+	rnibReaderMock.On("GetNodeb", RanName).Return(nodebInfo, err)
+	rsmRanInfo := models.RsmRanInfo{RanName, enums.Enb1MeasurementId, 0, enums.Start, false}
+	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfo).Return(err)
+
 	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", nodebInfo, rgc, enums.Enb1MeasurementId).Return(nil)
 	h.Handle(rmrReq)
 	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
@@ -250,8 +251,8 @@ func TestBuildAndSendError(t *testing.T) {
 	var err error
 	nodebInfo := &entities.NodebInfo{ConnectionStatus: entities.ConnectionStatus_CONNECTED}
 	rgc := getRsmGeneralConfiguration(true)
-	rnibReaderMock.On("GetNodeb", RanName).Return(nodebInfo, err)
 	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(rgc, err)
+	rnibReaderMock.On("GetNodeb", RanName).Return(nodebInfo, err)
 	rsmRanInfoStart := models.RsmRanInfo{RanName, enums.Enb1MeasurementId, 0, enums.Start, false}
 	rsmWriterMock.On("SaveRsmRanInfo", &rsmRanInfoStart).Return(err)
 	rsmRanInfoStop := models.RsmRanInfo{RanName, 0, 0, enums.Stop, true}
@@ -261,8 +262,8 @@ func TestBuildAndSendError(t *testing.T) {
 	rmrReq := &models.RmrRequest{RanName: RanName, Payload: payload, Len: len(payload), StartTime: time.Now()}
 	resourceStatusServiceMock.On("BuildAndSendInitiateRequest", nodebInfo, rgc, enums.Enb1MeasurementId).Return(common.NewInternalError(errors.New("Error")))
 	h.Handle(rmrReq)
-	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	rsmReaderMock.AssertCalled(t, "GetRsmGeneralConfiguration")
+	rnibReaderMock.AssertCalled(t, "GetNodeb", RanName)
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 1)
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 2)
 }

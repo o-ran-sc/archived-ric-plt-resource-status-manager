@@ -22,17 +22,20 @@ import (
 	"rsm/e2pdus"
 	"rsm/logger"
 	"rsm/models"
+	"rsm/services"
 )
 
 type ResourceStatusResponseHandler struct {
-	logger    *logger.Logger
-	converter converters.IResourceStatusResponseConverter
+	logger          *logger.Logger
+	rnibDataService services.RNibDataService
+	converter       converters.IResourceStatusResponseConverter
 }
 
-func NewResourceStatusResponseHandler(logger *logger.Logger, converter converters.IResourceStatusResponseConverter) ResourceStatusResponseHandler {
+func NewResourceStatusResponseHandler(logger *logger.Logger, converter converters.IResourceStatusResponseConverter, rnibDataService services.RNibDataService) ResourceStatusResponseHandler {
 	return ResourceStatusResponseHandler{
-		logger:    logger,
-		converter: converter,
+		logger:          logger,
+		converter:       converter,
+		rnibDataService: rnibDataService,
 	}
 }
 
@@ -64,4 +67,23 @@ func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 		request.RanName,
 		response.ENB1_Measurement_ID,
 		response.ENB2_Measurement_ID)
+
+	rsmRanInfo, err := h.rnibDataService.GetRsmRanInfo(request.RanName)
+
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - Failed fetching RsmRanInfo", request.RanName)
+		return
+	}
+
+	rsmRanInfo.Enb2MeasurementId = response.ENB2_Measurement_ID
+	rsmRanInfo.ActionStatus = true
+
+	err = h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
+
+	if err != nil {
+		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - Failed saving RsmRanInfo", request.RanName)
+		return
+	}
+
+	h.logger.Infof("#ResourceStatusResponseHandler.Handle - RAN name: %s - Successfully updated RsmRanInfo", request.RanName)
 }

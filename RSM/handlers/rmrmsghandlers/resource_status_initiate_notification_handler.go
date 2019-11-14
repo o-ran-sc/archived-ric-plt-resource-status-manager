@@ -63,15 +63,7 @@ func (h ResourceStatusInitiateNotificationHandler) UnmarshalResourceStatusPayloa
 
 func (h ResourceStatusInitiateNotificationHandler) SaveRsmRanInfoStopTrue(inventoryName string) {
 	rsmRanInfo := models.NewRsmRanInfo(inventoryName, 0, 0, enums.Stop, true)
-	err := h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
-
-	if err != nil {
-		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.SaveRsmRanInfoStopTrue - RAN name: %s - Failed saving RSM data", inventoryName)
-		return
-	}
-
-	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.SaveRsmRanInfoStopTrue - RAN name: %s - Successfully saved RSM data", inventoryName)
-
+	_ = h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
 }
 
 func (h ResourceStatusInitiateNotificationHandler) Handle(request *models.RmrRequest) {
@@ -89,10 +81,20 @@ func (h ResourceStatusInitiateNotificationHandler) Handle(request *models.RmrReq
 		return
 	}
 
+	config, err := h.rnibDataService.GetRsmGeneralConfiguration()
+
+	if err != nil {
+		return
+	}
+
+	if !config.EnableResourceStatus {
+		h.SaveRsmRanInfoStopTrue(inventoryName)
+		return
+	}
+
 	nodeb, err := h.rnibDataService.GetNodeb(inventoryName)
 
 	if err != nil {
-		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Error fetching RAN from rNib: %v", inventoryName, err)
 		return
 	}
 
@@ -100,20 +102,6 @@ func (h ResourceStatusInitiateNotificationHandler) Handle(request *models.RmrReq
 
 	if nodebConnectionStatus != entities.ConnectionStatus_CONNECTED {
 		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - RAN's connection status isn't CONNECTED", inventoryName)
-		//h.SaveRsmRanInfoStopTrue(inventoryName)
-		return
-	}
-
-	config, err := h.rnibDataService.GetRsmGeneralConfiguration()
-
-	if err != nil {
-		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Failed retrieving RSM general configuration", inventoryName)
-		return
-	}
-
-	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Successfully retrieved RSM general configuration", inventoryName)
-
-	if !config.EnableResourceStatus {
 		h.SaveRsmRanInfoStopTrue(inventoryName)
 		return
 	}
@@ -122,11 +110,8 @@ func (h ResourceStatusInitiateNotificationHandler) Handle(request *models.RmrReq
 	err = h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
 
 	if err != nil {
-		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Failed saving RSM data", inventoryName)
 		return
 	}
-
-	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - Successfully saved RSM data", inventoryName)
 
 	err = h.resourceStatusService.BuildAndSendInitiateRequest(nodeb, config, rsmRanInfo.Enb1MeasurementId)
 
