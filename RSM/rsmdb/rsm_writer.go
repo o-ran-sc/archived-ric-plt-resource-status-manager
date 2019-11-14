@@ -26,20 +26,18 @@ type rsmWriterInstance struct {
 	sdl common.ISdlInstance
 }
 
-/*
-RNibReader interface allows retrieving data from redis BD by various keys
-*/
+// RsmWriter interface allows inserting/updating data to/in redis BD with various keys
 type RsmWriter interface {
 	SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error
+	SaveRsmGeneralConfiguration(cfg *models.RsmGeneralConfiguration) error
 }
 
-/*
-GetRNibReader returns reference to RNibReader
-*/
+// GetRsmWriter returns reference to RsmWriter
 func GetRsmWriter(sdl common.ISdlInstance) RsmWriter {
 	return &rsmWriterInstance{sdl: sdl}
 }
 
+// SaveRsmRanInfo saves the ran related rsm data with key RanName
 func (r *rsmWriterInstance) SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error {
 
 	nodebNameKey, err := common.ValidateAndBuildNodeBNameKey(rsmRanInfo.RanName)
@@ -48,14 +46,27 @@ func (r *rsmWriterInstance) SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error 
 		return err
 	}
 
-	data, err := json.Marshal(rsmRanInfo)
+	return r.SaveWithKeyAndMarshal(nodebNameKey, rsmRanInfo)
+}
+
+// SaveRsmGeneralConfiguration saves the resource status request related configuration
+func (r *rsmWriterInstance) SaveRsmGeneralConfiguration(cfg *models.RsmGeneralConfiguration) error {
+
+	return r.SaveWithKeyAndMarshal(buildRsmGeneralConfigurationKey(), cfg)
+}
+
+
+// SaveWithKeyAndMarshal marshals 
+func (r *rsmWriterInstance) SaveWithKeyAndMarshal(key string, entity interface{}) error {
+
+	data, err := json.Marshal(entity)
 
 	if err != nil {
 		return common.NewInternalError(err)
 	}
 
 	var pairs []interface{}
-	pairs = append(pairs, nodebNameKey, data)
+	pairs = append(pairs, key, data)
 
 	err = r.sdl.Set(pairs)
 

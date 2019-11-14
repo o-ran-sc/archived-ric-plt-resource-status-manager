@@ -29,3 +29,8 @@ func (m *RsmWriterMock) SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error {
 	args := m.Called(rsmRanInfo)
 	return args.Error(0)
 }
+
+func (m *RsmWriterMock) SaveRsmGeneralConfiguration(cfg *models.RsmGeneralConfiguration) error {
+	args := m.Called(cfg)
+	return args.Error(0)
+}

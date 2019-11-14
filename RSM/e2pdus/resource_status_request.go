@@ -60,15 +60,15 @@ func BuildPackedResourceStatusRequest(registrationRequest enums.Registration_Req
 	packedBufSize := C.ulong(len(packedBuf))
 	pduAsString := ""
 
-	pLMNIdentities := make([]*C.char, len(request.CellIdList))
-	eUTRANCellIdentifiers := make([]*C.char, len(request.CellIdList))
+	pLMNIdentities := make([]*C.uchar, len(request.CellIdList))
+	eUTRANCellIdentifiers := make([]*C.uchar, len(request.CellIdList))
 
 	for i, cellID := range request.CellIdList {
-		var pLMNIdentity, eUTRANCellIdentifier string
+		var pLMNIdentity, eUTRANCellIdentifier []byte
 		if _, err := fmt.Sscanf(cellID, "%x:%x", &pLMNIdentity, &eUTRANCellIdentifier); err != nil {
 			return nil, "", fmt.Errorf("BuildPackedResourceStatusRequest() - unexpected CellID value [%s]@%d (want: \"<PLMNIdentifier>:<eUTRANCellIdentifier>\"), err: %s", cellID, i, err)
 		}
-		pLMNIdentities[i], eUTRANCellIdentifiers[i] = C.CString(pLMNIdentity), C.CString(eUTRANCellIdentifier)
+		pLMNIdentities[i], eUTRANCellIdentifiers[i] = (*C.uchar)(C.CBytes(pLMNIdentity)), (*C.uchar)(C.CBytes(eUTRANCellIdentifier))
 	}
 
 	defer func() {

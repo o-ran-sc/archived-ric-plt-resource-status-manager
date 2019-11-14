@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common"
 	"reflect"
-	"rsm/enums"
 	"rsm/models"
 )
 
@@ -28,21 +27,18 @@ type rsmReaderInstance struct {
 	sdl common.ISdlInstance
 }
 
-/*
-RNibReader interface allows retrieving data from redis BD by various keys
-*/
+// RsmReader interface allows retrieving data from redis BD by various keys
 type RsmReader interface {
 	GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error)
 	GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error)
 }
 
-/*
-GetRNibReader returns reference to RNibReader
-*/
+// GetRsmReader returns reference to RsmReader
 func GetRsmReader(sdl common.ISdlInstance) RsmReader {
 	return &rsmReaderInstance{sdl: sdl}
 }
 
+// GetRsmRanInfo returns the rsm data associated with ran 'ranName'
 func (r *rsmReaderInstance) GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error) {
 
 	key, err := common.ValidateAndBuildNodeBNameKey(ranName)
@@ -61,23 +57,14 @@ func (r *rsmReaderInstance) GetRsmRanInfo(ranName string) (*models.RsmRanInfo, e
 	return rsmRanInfo, nil
 }
 
-// TODO: implement
+// GetRsmGeneralConfiguration returns resource status request related configuration
 func (r *rsmReaderInstance) GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error) {
-	return &models.RsmGeneralConfiguration{
-		EnableResourceStatus:         true,
-		PartialSuccessAllowed:        true,
-		PrbPeriodic:                  true,
-		TnlLoadIndPeriodic:           true,
-		HwLoadIndPeriodic:            true,
-		AbsStatusPeriodic:            true,
-		RsrpMeasurementPeriodic:      true,
-		CsiPeriodic:                  true,
-		PeriodicityMs:                enums.ReportingPeriodicity_one_thousand_ms,
-		PeriodicityRsrpMeasurementMs: enums.ReportingPeriodicityRSRPMR_four_hundred_80_ms,
-		PeriodicityCsiMs:             enums.ReportingPeriodicityCSIR_ms20,
-	}, nil
+	cfg := &models.RsmGeneralConfiguration{}
+	err := r.getByKeyAndUnmarshal(buildRsmGeneralConfigurationKey(), cfg)
+	return cfg, err
 }
 
+// getByKeyAndUnmarshal returns the value that is associated with key 'key' as a Go structure
 func (r *rsmReaderInstance) getByKeyAndUnmarshal(key string, entity interface{}) error {
 	data, err := r.sdl.Get([]string{key})
 	if err != nil {
@@ -91,4 +78,8 @@ func (r *rsmReaderInstance) getByKeyAndUnmarshal(key string, entity interface{})
 		return nil
 	}
 	return common.NewResourceNotFoundErrorf("#rsmReader.getByKeyAndUnmarshal - entity of type %s not found. Key: %s", reflect.TypeOf(entity).String(), key)
+}
+
+func buildRsmGeneralConfigurationKey() string {
+	return "CFG:GENERAL:v1.0.0"
 }

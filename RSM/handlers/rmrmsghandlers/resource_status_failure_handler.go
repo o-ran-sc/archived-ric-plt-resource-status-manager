@@ -44,7 +44,7 @@ func (h ResourceStatusFailureHandler) Handle(request *models.RmrRequest) {
 			h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
 			return
 		}
-		h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - message: %s", request.RanName, pduAsString)
+		h.logger.Debugf("#ResourceStatusFailureHandler.Handle - RAN name: %s - message: %s", request.RanName, pduAsString)
 	}
 	response, err := h.converter.Convert(request.Payload)
 	if err != nil {

@@ -44,8 +44,6 @@ func (r X2apPduUnpacker) UnpackX2apPdu(packedBuf []byte) (*C.E2AP_PDU_t, error) 
 		return nil, errors.New("allocation failure (pdu)")
 	}
 
-	r.logger.Infof("#x2apPdu_asn1_unpacker.UnpackX2apPdu - Packed pdu(%d):%x", len(packedBuf), packedBuf)
-
 	errBuf := make([]C.char, r.maxMessageBufferSize)
 	if !C.per_unpack_pdu(pdu, C.ulong(len(packedBuf)), (*C.uchar)(unsafe.Pointer(&packedBuf[0])), C.ulong(len(errBuf)), &errBuf[0]) {
 		return nil, errors.New(fmt.Sprintf("unpacking error: %s", C.GoString(&errBuf[0])))
