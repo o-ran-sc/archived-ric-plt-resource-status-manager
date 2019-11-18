@@ -59,8 +59,6 @@ func NewRnibDataService(logger *logger.Logger, config *configuration.Configurati
 }
 
 func (w *rNibDataService) GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error) {
-	w.logger.Infof("#RnibDataService.GetRsmGeneralConfiguration")
-
 	var rsmGeneralConfiguration *models.RsmGeneralConfiguration = nil
 
 	err := w.retry("GetRsmGeneralConfiguration", func() (err error) {
@@ -68,46 +66,42 @@ func (w *rNibDataService) GetRsmGeneralConfiguration() (*models.RsmGeneralConfig
 		return
 	})
 
-	if err != nil {
-		w.logger.Infof("#RnibDataService.GetRsmGeneralConfiguration - Configuration: %+v", rsmGeneralConfiguration)
+	if err == nil {
+		w.logger.Infof("#RnibDataService.GetRsmGeneralConfiguration - configuration: %+v", *rsmGeneralConfiguration)
 	}
 
 	return rsmGeneralConfiguration, err
 }
 
 func (w *rNibDataService) GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error) {
-	w.logger.Infof("#RnibDataService.GetRsmRanInfo - RAN name: %s", ranName)
-
-	var rsmData *models.RsmRanInfo = nil
+	var rsmRanInfo *models.RsmRanInfo = nil
 
 	err := w.retry("GetRsmRanInfo", func() (err error) {
-		rsmData, err = w.rsmReader.GetRsmRanInfo(ranName)
+		rsmRanInfo, err = w.rsmReader.GetRsmRanInfo(ranName)
 		return
 	})
 
-	if err != nil {
-		w.logger.Infof("#RnibDataService.GetRsmRanInfo - RsmRanInfo: %+v", ranName)
+	if err == nil {
+		w.logger.Infof("#RnibDataService.GetRsmRanInfo - RAN name: %s, RsmRanInfo: %+v", ranName, *rsmRanInfo)
 	}
 
-
-
-	return rsmData, err
+	return rsmRanInfo, err
 }
 
 func (w *rNibDataService) SaveRsmRanInfo(rsmRanInfo *models.RsmRanInfo) error {
-	w.logger.Infof("#RnibDataService.SaveRsmRanInfo - RsmRanInfo: %+v", rsmRanInfo)
-
 	err := w.retry("SaveRsmRanInfo", func() (err error) {
 		err = w.rsmWriter.SaveRsmRanInfo(rsmRanInfo)
 		return
 	})
 
+	if err == nil {
+		w.logger.Infof("#RnibDataService.SaveRsmRanInfo - RAN name: %s, RsmRanInfo: %+v", rsmRanInfo.RanName, *rsmRanInfo)
+	}
+
 	return err
 }
 
 func (w *rNibDataService) GetNodeb(ranName string) (*entities.NodebInfo, error) {
-	w.logger.Infof("#RnibDataService.GetNodeb - ranName: %s", ranName)
-
 	var nodeb *entities.NodebInfo = nil
 
 	err := w.retry("GetNodeb", func() (err error) {
@@ -149,7 +143,7 @@ func (w *rNibDataService) retry(rnibFunc string, f func() error) (err error) {
 			return
 		}
 		if !isRnibConnectionError(err) {
-			w.logger.Errorf("#RnibDataService.retry - error in %s: %s", rnibFunc, err)
+			w.logger.Errorf("#RnibDataService - error in %s: %s", rnibFunc, err)
 			return err
 		}
 		if i >= attempts {

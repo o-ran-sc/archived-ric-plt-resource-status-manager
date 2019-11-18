@@ -59,7 +59,7 @@ func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 	}
 
 	if response.ENB2_Measurement_ID == 0 {
-		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - ignoring response without ENB2_Measurement_ID for ENB1_Measurement_ID = %d", request.RanName, response.ENB1_Measurement_ID)
+		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - ignoring response without ENB2_Measurement_ID", request.RanName)
 		return
 	}
 
@@ -71,7 +71,6 @@ func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 	rsmRanInfo, err := h.rnibDataService.GetRsmRanInfo(request.RanName)
 
 	if err != nil {
-		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - Failed fetching RsmRanInfo", request.RanName)
 		return
 	}
 
@@ -81,7 +80,6 @@ func (h ResourceStatusResponseHandler) Handle(request *models.RmrRequest) {
 	err = h.rnibDataService.SaveRsmRanInfo(rsmRanInfo)
 
 	if err != nil {
-		h.logger.Errorf("#ResourceStatusResponseHandler.Handle - RAN name: %s - Failed saving RsmRanInfo", request.RanName)
 		return
 	}
 

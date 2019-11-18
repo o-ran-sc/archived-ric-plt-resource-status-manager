@@ -56,7 +56,7 @@ func (h ResourceStatusInitiateNotificationHandler) UnmarshalResourceStatusPayloa
 		return nil, fmt.Errorf("unknown node type for RAN %s", inventoryName)
 	}
 
-	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.UnmarshalResourceStatusPayload - Unmarshaled payload successfully: %+v", payload)
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.UnmarshalResourceStatusPayload - Unmarshaled payload successfully: %+v", unmarshalledPayload)
 	return &unmarshalledPayload, nil
 
 }
@@ -99,6 +99,8 @@ func (h ResourceStatusInitiateNotificationHandler) Handle(request *models.RmrReq
 	}
 
 	nodebConnectionStatus := nodeb.GetConnectionStatus()
+
+	h.logger.Infof("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - successfully fetched RAN from db. RAN's connection status: %s", inventoryName, nodebConnectionStatus)
 
 	if nodebConnectionStatus != entities.ConnectionStatus_CONNECTED {
 		h.logger.Errorf("#ResourceStatusInitiateNotificationHandler.Handle - RAN name: %s - RAN's connection status isn't CONNECTED", inventoryName)

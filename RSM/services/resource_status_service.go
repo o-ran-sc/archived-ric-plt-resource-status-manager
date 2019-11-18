@@ -72,14 +72,14 @@ func (m *ResourceStatusService) extractCellIdList(nodeb *entities.NodebInfo) ([]
 	enb, ok := nodeb.Configuration.(*entities.NodebInfo_Enb)
 
 	if !ok {
-		m.logger.Errorf("#ResourceStatusService.extractCellIdList - Invalid configuration for RAN %s", nodeb.RanName)
+		m.logger.Errorf("#ResourceStatusService.extractCellIdList - RAN name: %s - invalid configuration", nodeb.RanName)
 		return []string{}, fmt.Errorf("Invalid configuration for RAN %s", nodeb.RanName)
 	}
 
 	cells := enb.Enb.ServedCells
 
 	if len(cells) == 0 {
-		m.logger.Errorf("#ResourceStatusService.extractCellIdList - Empty cell list for RAN %s", nodeb.RanName)
+		m.logger.Errorf("#ResourceStatusService.extractCellIdList - RAN name: %s - empty cell list", nodeb.RanName)
 		return []string{}, fmt.Errorf("empty cell list for RAN %s", nodeb.RanName)
 	}
 
