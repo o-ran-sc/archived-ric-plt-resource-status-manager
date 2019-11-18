@@ -24,10 +24,10 @@ import (
 	"rsm/controllers"
 )
 
-func Run(port int, controller controllers.IRootController) error {
+func Run(port int, rootController controllers.IRootController, controller controllers.IController) error {
 
 	router := mux.NewRouter()
-	initializeRoutes(router, controller)
+	initializeRoutes(router, rootController, controller)
 
 	addr := fmt.Sprintf(":%d", port)
 
@@ -36,7 +36,10 @@ func Run(port int, controller controllers.IRootController) error {
 	return fmt.Errorf("#http_server.Run - Fail initiating HTTP server. Error: %v", err)
 }
 
-func initializeRoutes(router *mux.Router, rootController controllers.IRootController) {
+func initializeRoutes(router *mux.Router, rootController controllers.IRootController, controller controllers.IController) {
 	r := router.PathPrefix("/v1").Subrouter()
 	r.HandleFunc("/health", rootController.HandleHealthCheckRequest).Methods("GET")
+
+	rr := r.PathPrefix("/general").Subrouter()
+	rr.HandleFunc("/resourcestatus", controller.ResourceStatus).Methods("PUT")
 }

@@ -29,6 +29,7 @@ import (
 	"rsm/httpserver"
 	"rsm/logger"
 	"rsm/managers/rmrmanagers"
+	"rsm/providers/httpmsghandlerprovider"
 	"rsm/rmrcgo"
 	"rsm/rsmdb"
 	"rsm/services"
@@ -70,8 +71,8 @@ func main() {
 	defer rmrMessenger.Close()
 	go rmrReceiver.ListenAndHandle()
 
-	//handlerProvider := httpmsghandlerprovider.NewRequestHandlerProvider(logger, rmrSender, config, rnibDataService)
+	handlerProvider := httpmsghandlerprovider.NewRequestHandlerProvider(logger, rnibDataService, resourceStatusService)
 	rootController := controllers.NewRootController(rnibDataService)
-	//controller := controllers.NewController(logger, handlerProvider)
-	_ = httpserver.Run(config.Http.Port, rootController)
+	controller := controllers.NewController(logger, handlerProvider)
+	_ = httpserver.Run(config.Http.Port, rootController, controller)
 }

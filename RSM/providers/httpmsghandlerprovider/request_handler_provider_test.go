@@ -21,24 +21,50 @@ import (
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"rsm/configuration"
+	"rsm/handlers/httpmsghandlers"
+	"rsm/logger"
+	"rsm/mocks"
 	"rsm/rsmerrors"
-	"rsm/tests/testhelper"
+	"rsm/services"
 	"testing"
 )
 
 func setupTest(t *testing.T) *RequestHandlerProvider {
+	log, err := logger.InitLogger(logger.DebugLevel)
+	if err != nil {
+		t.Errorf("#... - failed to initialize logger, error: %s", err)
+	}
+
 	config, err := configuration.ParseConfiguration()
 	if err != nil {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
-	rnibDataService, rmrSender, log := testhelper.InitTestCase(t)
-	return NewRequestHandlerProvider(log, rmrSender, config, rnibDataService)
+
+	resourceStatusServiceMock := &mocks.ResourceStatusServiceMock{}
+	rnibReaderMock := &mocks.RnibReaderMock{}
+	rsmReaderMock := &mocks.RsmReaderMock{}
+	rsmWriterMock := &mocks.RsmWriterMock{}
+
+	rnibDataService := services.NewRnibDataService(log, config, rnibReaderMock, rsmReaderMock, rsmWriterMock)
+	return NewRequestHandlerProvider(log, rnibDataService, resourceStatusServiceMock)
 }
 
 func TestNewRequestHandlerProvider(t *testing.T) {
 	provider := setupTest(t)
 
 	assert.NotNil(t, provider)
+}
+
+func TestResourceStatusRequestHandler(t *testing.T) {
+	provider := setupTest(t)
+	handler, err := provider.GetHandler(ResourceStatusRequest)
+
+	assert.NotNil(t, provider)
+	assert.Nil(t, err)
+
+	_, ok := handler.(*httpmsghandlers.ResourceStatusRequestHandler)
+
+	assert.True(t, ok)
 }
 
 func TestNewRequestHandlerProvider_InternalError(t *testing.T) {

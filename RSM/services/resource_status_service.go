@@ -35,6 +35,7 @@ type ResourceStatusService struct {
 
 type IResourceStatusService interface {
 	BuildAndSendInitiateRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64) error
+	//BuildAndSendStopRequest(config *models.RsmGeneralConfiguration, ranName string, enb1MeasurementId int64, enb2MeasurementId int64) error
 }
 
 func NewResourceStatusService(logger *logger.Logger, rmrSender *rmrsender.RmrSender) *ResourceStatusService {
@@ -66,6 +67,26 @@ func (m *ResourceStatusService) BuildAndSendInitiateRequest(nodeb *entities.Node
 
 	return m.rmrSender.Send(rmrMsg)
 }
+
+/*func (m *ResourceStatusService) BuildAndSendStopRequest(config *models.RsmGeneralConfiguration, ranName string, enb1MeasurementId int64, enb2MeasurementId int64) error {
+
+	requestParams := &e2pdus.ResourceStatusRequestData{
+		MeasurementID:  e2pdus.Measurement_ID(enb1MeasurementId),
+		MeasurementID2: e2pdus.Measurement_ID(enb2MeasurementId),
+	}
+
+	payload, payloadAsString, err := e2pdus.BuildPackedResourceStatusRequest(enums.Registration_Request_stop, requestParams, e2pdus.MaxAsn1PackedBufferSize, e2pdus.MaxAsn1CodecMessageBufferSize, m.logger.DebugEnabled())
+
+	if err != nil {
+		m.logger.Errorf("#ResourceStatusService.BuildAndSendStopRequest - RAN name: %s. Failed to build and pack resource status stop request. error: %s", ranName, err)
+		return err
+	}
+
+	m.logger.Debugf("#ResourceStatusService.BuildAndSendStopRequest - RAN name: %s. Successfully build packed payload: %s", ranName, payloadAsString)
+	rmrMsg := models.NewRmrMessage(rmrcgo.RicResStatusReq, ranName, payload)
+
+	return m.rmrSender.Send(rmrMsg)
+}*/
 
 func (m *ResourceStatusService) extractCellIdList(nodeb *entities.NodebInfo) ([]string, error) {
 

@@ -15,20 +15,8 @@
 // limitations under the License.
 //
 
-package mocks
+package models
 
-import (
-	"github.com/stretchr/testify/mock"
-	"net/http"
-)
-
-type ControllerMock struct {
-	mock.Mock
-}
-
-func (c *ControllerMock) ResourceStatus(writer http.ResponseWriter, r *http.Request){
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
-
-	c.Called()
+type ResourceStatusRequest struct {
+	EnableResourceStatus   bool `json:"enableResourceStatus"`
 }

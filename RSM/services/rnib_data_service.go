@@ -31,10 +31,12 @@ import (
 
 type RNibDataService interface {
 	GetRsmGeneralConfiguration() (*models.RsmGeneralConfiguration, error)
+	SaveRsmGeneralConfiguration(config *models.RsmGeneralConfiguration) error
 	GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error)
 	SaveRsmRanInfo(rsmData *models.RsmRanInfo) error
 	GetNodeb(ranName string) (*entities.NodebInfo, error)
 	GetListNodebIds() ([]*entities.NbIdentity, error)
+	GetListEnbIds() ([]*entities.NbIdentity, error)
 	PingRnib() bool
 }
 
@@ -71,6 +73,17 @@ func (w *rNibDataService) GetRsmGeneralConfiguration() (*models.RsmGeneralConfig
 	}
 
 	return rsmGeneralConfiguration, err
+}
+
+func (w *rNibDataService) SaveRsmGeneralConfiguration(config *models.RsmGeneralConfiguration) error {
+	w.logger.Infof("#RnibDataService.SaveRsmGeneralConfiguration - configuration: %+v", *config)
+
+	err := w.retry("SaveRsmGeneralConfiguration", func() (err error) {
+		err = w.rsmWriter.SaveRsmGeneralConfiguration(config)
+		return
+	})
+
+	return err
 }
 
 func (w *rNibDataService) GetRsmRanInfo(ranName string) (*models.RsmRanInfo, error) {
@@ -110,6 +123,19 @@ func (w *rNibDataService) GetNodeb(ranName string) (*entities.NodebInfo, error) 
 	})
 
 	return nodeb, err
+}
+
+func (w *rNibDataService) GetListEnbIds() ([]*entities.NbIdentity, error) {
+	w.logger.Infof("#RnibDataService.GetListEnbIds")
+
+	var nodeIds []*entities.NbIdentity = nil
+
+	err := w.retry("GetListEnbIds", func() (err error) {
+		nodeIds, err = w.rnibReader.GetListEnbIds()
+		return
+	})
+
+	return nodeIds, err
 }
 
 func (w *rNibDataService) GetListNodebIds() ([]*entities.NbIdentity, error) {

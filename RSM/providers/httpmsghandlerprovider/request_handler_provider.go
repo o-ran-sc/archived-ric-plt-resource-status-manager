@@ -17,39 +17,39 @@
 package httpmsghandlerprovider
 
 import (
-	"rsm/configuration"
 	"rsm/handlers/httpmsghandlers"
 	"rsm/logger"
 	"rsm/rsmerrors"
 	"rsm/services"
-	"rsm/services/rmrsender"
 )
 
 type IncomingRequest string
 
 const (
-	ResourceStatusInitiation = "ResourceStatusInitiation"
+	ResourceStatusRequest = "ResourceStatusRequest"
 )
 
 type RequestHandlerProvider struct {
-	requestMap map[IncomingRequest]*httpmsghandlers.RequestHandler
+	requestMap map[IncomingRequest]httpmsghandlers.RequestHandler
 	logger     *logger.Logger
 }
 
-func NewRequestHandlerProvider(logger *logger.Logger, rmrSender *rmrsender.RmrSender, config *configuration.Configuration, rNibDataService services.RNibDataService) *RequestHandlerProvider {
+func NewRequestHandlerProvider(logger *logger.Logger, rNibDataService services.RNibDataService, resourceStatusService services.IResourceStatusService) *RequestHandlerProvider {
 
 	return &RequestHandlerProvider{
-		requestMap: initRequestHandlerMap(logger, rmrSender, config, rNibDataService),
+		requestMap: initRequestHandlerMap(logger, rNibDataService, resourceStatusService),
 		logger:     logger,
 	}
 }
 
-func initRequestHandlerMap(logger *logger.Logger, rmrSender *rmrsender.RmrSender, config *configuration.Configuration, rNibDataService services.RNibDataService) map[IncomingRequest]*httpmsghandlers.RequestHandler {
+func initRequestHandlerMap(logger *logger.Logger, rNibDataService services.RNibDataService, resourceStatusService services.IResourceStatusService) map[IncomingRequest]httpmsghandlers.RequestHandler {
 
-	return map[IncomingRequest]*httpmsghandlers.RequestHandler{}
+	return map[IncomingRequest]httpmsghandlers.RequestHandler{
+		ResourceStatusRequest: httpmsghandlers.NewResourceStatusRequestHandler(logger, rNibDataService, resourceStatusService),
+	}
 }
 
-func (provider RequestHandlerProvider) GetHandler(requestType IncomingRequest) (*httpmsghandlers.RequestHandler, error) {
+func (provider RequestHandlerProvider) GetHandler(requestType IncomingRequest) (httpmsghandlers.RequestHandler, error) {
 	handler, ok := provider.requestMap[requestType]
 
 	if !ok {

@@ -30,12 +30,6 @@ var messageDirectionEnumName = map[int32]string{
 	2: "RIC_TO_RAN",
 }
 
-const (
-	UNKNOWN_MESSAGE_DIRECTION MessageDirection = 0
-	RAN_TO_RIC                MessageDirection = 1
-	RIC_TO_RAN                MessageDirection = 2
-)
-
 func (md MessageDirection) String() string {
 	s, ok := messageDirectionEnumName[int32(md)]
 	if ok {
