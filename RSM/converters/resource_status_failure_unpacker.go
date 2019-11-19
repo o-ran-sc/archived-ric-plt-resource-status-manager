@@ -50,7 +50,9 @@ func convertCompleteFailureCauseInformation(completeFailureCauseInformation_List
 		case C.CompleteFailureCauseInformation_ItemIEs__value_PR_CompleteFailureCauseInformation_Item:
 			item := (*C.CompleteFailureCauseInformation_Item_t)(unsafe.Pointer(&itemIE.value.choice[0]))
 			measurementInitiationResult := models.MeasurementInitiationResult{CellId: buildCellId(item.cell_ID)}
-			convertMeasurementFailureCauses(&item.measurementFailureCause_List, &measurementInitiationResult)
+			if err:=convertMeasurementFailureCauses(&item.measurementFailureCause_List, &measurementInitiationResult); err != nil {
+				return nil, err
+			}
 			measurementInitiationResults = append(measurementInitiationResults, &measurementInitiationResult)
 		}
 	}
