@@ -31,3 +31,8 @@ func (m *ResourceStatusServiceMock) BuildAndSendInitiateRequest(nodeb *entities.
 	args := m.Called(nodeb, config, enb1MeasurementId)
 	return args.Error(0)
 }
+
+func (m *ResourceStatusServiceMock) BuildAndSendStopRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64, enb2MeasurementId int64) error {
+	args := m.Called(nodeb, config, enb1MeasurementId, enb2MeasurementId)
+	return args.Error(0)
+}

@@ -93,17 +93,19 @@ func (h ResourceStatusRequestHandler) saveAndSendRsmRanInfo(nodebInfo *entities.
 	}
 
 	if config.EnableResourceStatus {
-		err := h.handleNotStartedRsmRanInfo(nodebInfo, rsmRanInfo, config)
-		return err
+		return h.handleNotStartedRsmRanInfo(nodebInfo, rsmRanInfo, config)
 	}
 
-	//err = h.handleNotStoppedRsmRanInfo(nodebInfo, rsmRanInfo, config)
-	return nil
+	return h.handleNotStoppedRsmRanInfo(nodebInfo, rsmRanInfo, config)
 }
 
-/*func (h ResourceStatusRequestHandler) handleNotStoppedRsmRanInfo(nodebInfo *entities.NodebInfo, rsmRanInfo *models.RsmRanInfo, config *models.RsmGeneralConfiguration) error {
+func (h ResourceStatusRequestHandler) handleNotStoppedRsmRanInfo(nodebInfo *entities.NodebInfo, rsmRanInfo *models.RsmRanInfo, config *models.RsmGeneralConfiguration) error {
 	if rsmRanInfo.Action == enums.Stop && rsmRanInfo.ActionStatus {
 		return nil
+	}
+
+	if rsmRanInfo.Enb2MeasurementId == 0 {
+		return rsmerrors.NewInternalError()
 	}
 
 	if rsmRanInfo.Action != enums.Stop {
@@ -114,9 +116,8 @@ func (h ResourceStatusRequestHandler) saveAndSendRsmRanInfo(nodebInfo *entities.
 		}
 	}
 
-	err := h.resourceStatusService.BuildAndSendStopRequest(config, rsmRanInfo.RanName, rsmRanInfo.Enb1MeasurementId, rsmRanInfo.Enb2MeasurementId)
-	return err
-}*/
+	return h.resourceStatusService.BuildAndSendStopRequest(nodebInfo, config, rsmRanInfo.Enb1MeasurementId, rsmRanInfo.Enb2MeasurementId)
+}
 
 func (h ResourceStatusRequestHandler) handleNotStartedRsmRanInfo(nodebInfo *entities.NodebInfo, rsmRanInfo *models.RsmRanInfo, config *models.RsmGeneralConfiguration) error {
 	if rsmRanInfo.Action == enums.Start && rsmRanInfo.ActionStatus {
@@ -131,30 +132,20 @@ func (h ResourceStatusRequestHandler) handleNotStartedRsmRanInfo(nodebInfo *enti
 		}
 	}
 
-	err := h.resourceStatusService.BuildAndSendInitiateRequest(nodebInfo, config, rsmRanInfo.Enb1MeasurementId)
-	return err
+	return h.resourceStatusService.BuildAndSendInitiateRequest(nodebInfo, config, rsmRanInfo.Enb1MeasurementId)
 }
 
-/*func (h ResourceStatusRequestHandler) saveRsmRanInfoStopFalse(rsmRanInfo *models.RsmRanInfo) error {
+func (h ResourceStatusRequestHandler) saveRsmRanInfoStopFalse(rsmRanInfo *models.RsmRanInfo) error {
 	rsmRanInfo.Action = enums.Stop
 	rsmRanInfo.ActionStatus = false
 
-	err := h.rNibDataService.SaveRsmRanInfo(rsmRanInfo)
-	if err != nil {
-		h.logger.Errorf("#ResourceStatusRequestHandler.saveRsmRanInfoStopFalse - failed to save rsm ran data to RNIB. Error: %s", err.Error())
-		return err
-	}
-	return nil
-}*/
+	return h.rNibDataService.SaveRsmRanInfo(rsmRanInfo)
+}
 
 func (h ResourceStatusRequestHandler) saveRsmRanInfoStartFalse(rsmRanInfo *models.RsmRanInfo) error {
 	rsmRanInfo.Action = enums.Start
 	rsmRanInfo.ActionStatus = false
 	rsmRanInfo.Enb2MeasurementId = 0
 
-	err := h.rNibDataService.SaveRsmRanInfo(rsmRanInfo)
-	if err != nil {
-		return err
-	}
-	return nil
+	return h.rNibDataService.SaveRsmRanInfo(rsmRanInfo)
 }

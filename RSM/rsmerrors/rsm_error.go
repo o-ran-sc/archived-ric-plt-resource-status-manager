@@ -15,16 +15,23 @@
 // limitations under the License.
 //
 
+package rsmerrors
 
-package enums
+import "fmt"
 
-type Registration_Request int
+type RsmError struct {
+	*BaseError
+}
 
-const (
-	Registration_Request_start Registration_Request = iota
-	Registration_Request_stop
-)
+func NewRsmError(numberOfFails int) *RsmError {
+	return &RsmError{
+		&BaseError{
+			Code:    503,
+			Message: fmt.Sprintf("Did not send %d resource status requests to RMR.", numberOfFails),
+		},
+	}
+}
 
-func (rs Registration_Request) String() string {
-	return [...]string{"start", "stop"}[rs]
+func (e *RsmError) Error() string {
+	return e.Message
 }
