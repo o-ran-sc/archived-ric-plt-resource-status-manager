@@ -9,3 +9,6 @@ __pycache__/
 *.html
 *.log
 venv/*
+# documentation
+.tox
+docs/_build/
