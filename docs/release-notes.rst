@@ -80,7 +80,7 @@ Release Data
 
 
 Feature additions
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 <STATE ADDED FEATURES BY REFERENCE TO JIRA>
 
 <EXAMPLE>:
@@ -101,7 +101,7 @@ Feature additions
 +--------------------------------------+--------------------------------------+
 
 Bug corrections
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 **JIRA TICKETS:**
 
@@ -119,7 +119,7 @@ Bug corrections
 +--------------------------------------+--------------------------------------+
 
 Deliverables
-----------------
+------------
 
 Software deliverables
 ^^^^^^^^^^^^^^^^^^^^^^^
