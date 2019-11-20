@@ -67,8 +67,11 @@ func (h ResourceStatusRequestHandler) Handle(request models.Request) error {
 			continue
 		}
 
+		h.logger.Infof("#ResourceStatusRequestHandler.Handle - handle RAN: %s started", nodeb.RanName)
+
 		if nodeb.ConnectionStatus != entities.ConnectionStatus_CONNECTED {
 			h.logger.Infof("#ResourceStatusRequestHandler.Handle - RAN name: %s - connection status not CONNECTED, ignore", nodeb.RanName)
+			h.logger.Infof("#ResourceStatusRequestHandler.Handle - handle RAN: %s completed", nodeb.RanName)
 			numberOfFails++
 			continue
 		}
@@ -77,6 +80,7 @@ func (h ResourceStatusRequestHandler) Handle(request models.Request) error {
 		if err != nil {
 			numberOfFails++
 		}
+		h.logger.Infof("#ResourceStatusRequestHandler.Handle - handle RAN: %s completed", nodeb.RanName)
 	}
 
 	if numberOfFails > 0 {
