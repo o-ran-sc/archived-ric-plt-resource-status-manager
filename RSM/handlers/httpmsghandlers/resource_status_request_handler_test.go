@@ -231,11 +231,11 @@ func TestResourceStatusRequestHandlerTrueNumberOfFails3(t *testing.T) {
 	assert.Equal(t, actualErr.Error(), rsmError.Error())
 }
 
-/*func TestResourceStatusRequestHandlerFalseStopSuccess(t *testing.T) {
+func TestResourceStatusRequestHandlerFalseStopSuccess(t *testing.T) {
 
 	handler, readerMock, rsmReaderMock, rsmWriterMock, resourceStatusServiceMock := initTest(t)
 
-	config := tests.GetRsmGeneralConfiguration(false)
+	config := tests.GetRsmGeneralConfiguration(true)
 	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(config, nil)
 	rsmWriterMock.On("SaveRsmGeneralConfiguration", config).Return(nil)
 
@@ -249,28 +249,149 @@ func TestResourceStatusRequestHandlerTrueNumberOfFails3(t *testing.T) {
 	readerMock.On("GetNodeb", "RanName_2").Return(nb2, nil)
 	readerMock.On("GetNodeb", "RanName_3").Return(nb3, nil)
 
-	rrInfo1 := &models.RsmRanInfo{RanName:"RanName_1", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:0, Action:enums.Start, ActionStatus:false}
-	rrInfo2 := &models.RsmRanInfo{RanName:"RanName_2", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:0, Action:enums.Start, ActionStatus:true}
-	rrInfo3 := &models.RsmRanInfo{RanName:"RanName_3", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:0, Action:enums.Stop, ActionStatus:false}
+	rrInfo1 := &models.RsmRanInfo{RanName:"RanName_1", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Stop, ActionStatus:false}
+	rrInfo2 := &models.RsmRanInfo{RanName:"RanName_2", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Stop, ActionStatus:true}
+	rrInfo3 := &models.RsmRanInfo{RanName:"RanName_3", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Start, ActionStatus:false}
 	rsmReaderMock.On("GetRsmRanInfo", "RanName_1").Return(rrInfo1, nil)
 	rsmReaderMock.On("GetRsmRanInfo", "RanName_2").Return(rrInfo2, nil)
 	rsmReaderMock.On("GetRsmRanInfo", "RanName_3").Return(rrInfo3, nil)
 
 	rsmWriterMock.On("SaveRsmRanInfo", rrInfo3).Return(nil)
 
-	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb1, config, enums.Enb1MeasurementId).Return(nil)
-	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb3, config, enums.Enb1MeasurementId).Return(nil)
+	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb1, config, rrInfo1.Enb1MeasurementId, rrInfo1.Enb2MeasurementId).Return(nil)
+	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb3, config, rrInfo3.Enb1MeasurementId, rrInfo3.Enb2MeasurementId).Return(nil)
 
 
-	resourceStatusRequest := models.ResourceStatusRequest{EnableResourceStatus:true}
+	resourceStatusRequest := models.ResourceStatusRequest{EnableResourceStatus:false}
 	actualErr := handler.Handle(resourceStatusRequest)
 
 	readerMock.AssertNumberOfCalls(t, "GetNodeb", 3)
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
-	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 2)
+	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendStopRequest", 2)
 
 	assert.Equal(t, actualErr, nil)
-}*/
+}
+
+func TestResourceStatusRequestHandlerFalseNumberOfFails2(t *testing.T) {
+
+	handler, readerMock, rsmReaderMock, rsmWriterMock, resourceStatusServiceMock := initTest(t)
+
+	config := tests.GetRsmGeneralConfiguration(true)
+	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(config, nil)
+	rsmWriterMock.On("SaveRsmGeneralConfiguration", config).Return(nil)
+
+	nbIdentityList := CreateIdentityList()
+	readerMock.On("GetListEnbIds").Return(nbIdentityList, nil)
+
+	nb1 := &entities.NodebInfo{RanName: "RanName_1", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	nb2 := &entities.NodebInfo{RanName: "RanName_2", ConnectionStatus: entities.ConnectionStatus_DISCONNECTED,}
+	nb3 := &entities.NodebInfo{RanName: "RanName_3", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	readerMock.On("GetNodeb", "RanName_1").Return(nb1, nil)
+	readerMock.On("GetNodeb", "RanName_2").Return(nb2, nil)
+	readerMock.On("GetNodeb", "RanName_3").Return(nb3, nil)
+
+	err := common.NewInternalError(errors.New("Error"))
+	rrInfo1 := &models.RsmRanInfo{RanName:"RanName_1", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Stop, ActionStatus:false}
+	rrInfo3 := &models.RsmRanInfo{RanName:"RanName_3", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Start, ActionStatus:false}
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_1").Return(rrInfo1, err)
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_3").Return(rrInfo3, nil)
+
+	rsmWriterMock.On("SaveRsmRanInfo", rrInfo3).Return(nil)
+
+	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb3, config, rrInfo3.Enb1MeasurementId, rrInfo3.Enb2MeasurementId).Return(nil)
+
+
+	resourceStatusRequest := models.ResourceStatusRequest{EnableResourceStatus:false}
+	actualErr := handler.Handle(resourceStatusRequest)
+
+	readerMock.AssertNumberOfCalls(t, "GetNodeb", 3)
+	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
+	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendStopRequest", 1)
+
+	rsmError := rsmerrors.NewRsmError(2)
+	assert.Equal(t, actualErr, rsmError)
+	assert.Equal(t, actualErr.Error(), rsmError.Error())
+}
+
+func TestResourceStatusRequestHandlerFalseNumberOfFails3(t *testing.T) {
+
+	handler, readerMock, rsmReaderMock, rsmWriterMock, resourceStatusServiceMock := initTest(t)
+
+	config := tests.GetRsmGeneralConfiguration(true)
+	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(config, nil)
+	rsmWriterMock.On("SaveRsmGeneralConfiguration", config).Return(nil)
+
+	nbIdentityList := CreateIdentityList()
+	readerMock.On("GetListEnbIds").Return(nbIdentityList, nil)
+
+	err := common.NewInternalError(errors.New("Error"))
+	nb1 := &entities.NodebInfo{RanName: "RanName_1", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	nb2 := &entities.NodebInfo{RanName: "RanName_2", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	nb3 := &entities.NodebInfo{RanName: "RanName_3", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	readerMock.On("GetNodeb", "RanName_1").Return(nb1, nil)
+	readerMock.On("GetNodeb", "RanName_2").Return(nb2, err)
+	readerMock.On("GetNodeb", "RanName_3").Return(nb3, nil)
+
+	rrInfo1 := &models.RsmRanInfo{RanName:"RanName_1", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Stop, ActionStatus:false}
+	rrInfo3 := &models.RsmRanInfo{RanName:"RanName_3", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Start, ActionStatus:false}
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_1").Return(rrInfo1, nil)
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_3").Return(rrInfo3, nil)
+
+	rsmWriterMock.On("SaveRsmRanInfo", rrInfo3).Return(err)
+
+	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb1, config, rrInfo1.Enb1MeasurementId, rrInfo1.Enb2MeasurementId).Return(errors.New("Error"))
+
+	resourceStatusRequest := models.ResourceStatusRequest{EnableResourceStatus:false}
+	actualErr := handler.Handle(resourceStatusRequest)
+
+	readerMock.AssertNumberOfCalls(t, "GetNodeb", 3)
+	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
+	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendStopRequest", 1)
+
+	rsmError := rsmerrors.NewRsmError(3)
+	assert.Equal(t, actualErr, rsmError)
+	assert.Equal(t, actualErr.Error(), rsmError.Error())
+}
+
+func TestResourceStatusRequestHandlerFalseNoEnb2MeasurementId(t *testing.T) {
+
+	handler, readerMock, rsmReaderMock, rsmWriterMock, resourceStatusServiceMock := initTest(t)
+
+	config := tests.GetRsmGeneralConfiguration(true)
+	rsmReaderMock.On("GetRsmGeneralConfiguration").Return(config, nil)
+	rsmWriterMock.On("SaveRsmGeneralConfiguration", config).Return(nil)
+
+	nbIdentityList := CreateIdentityList()
+	readerMock.On("GetListEnbIds").Return(nbIdentityList, nil)
+
+	nb1 := &entities.NodebInfo{RanName: "RanName_1", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	nb2 := &entities.NodebInfo{RanName: "RanName_2", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	nb3 := &entities.NodebInfo{RanName: "RanName_3", ConnectionStatus: entities.ConnectionStatus_CONNECTED,}
+	readerMock.On("GetNodeb", "RanName_1").Return(nb1, nil)
+	readerMock.On("GetNodeb", "RanName_2").Return(nb2, nil)
+	readerMock.On("GetNodeb", "RanName_3").Return(nb3, nil)
+
+	rrInfo1 := &models.RsmRanInfo{RanName:"RanName_1", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Stop, ActionStatus:false}
+	rrInfo2 := &models.RsmRanInfo{RanName:"RanName_2", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:2, Action:enums.Stop, ActionStatus:true}
+	rrInfo3 := &models.RsmRanInfo{RanName:"RanName_3", Enb1MeasurementId:enums.Enb1MeasurementId, Enb2MeasurementId:0, Action:enums.Start, ActionStatus:false}
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_1").Return(rrInfo1, nil)
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_2").Return(rrInfo2, nil)
+	rsmReaderMock.On("GetRsmRanInfo", "RanName_3").Return(rrInfo3, nil)
+
+	resourceStatusServiceMock.On("BuildAndSendStopRequest", nb1, config, rrInfo1.Enb1MeasurementId, rrInfo1.Enb2MeasurementId).Return(nil)
+
+	resourceStatusRequest := models.ResourceStatusRequest{EnableResourceStatus:false}
+	actualErr := handler.Handle(resourceStatusRequest)
+
+	readerMock.AssertNumberOfCalls(t, "GetNodeb", 3)
+	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 0)
+	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendStopRequest", 1)
+
+	rsmError := rsmerrors.NewRsmError(1)
+	assert.Equal(t, actualErr, rsmError)
+	assert.Equal(t, actualErr.Error(), rsmError.Error())
+}
+
 func CreateIdentityList() []*entities.NbIdentity {
 	nbIdentity1 := entities.NbIdentity{InventoryName: "RanName_1"}
 	nbIdentity2 := entities.NbIdentity{InventoryName: "RanName_2"}

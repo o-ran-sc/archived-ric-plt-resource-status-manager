@@ -35,7 +35,7 @@ type ResourceStatusService struct {
 
 type IResourceStatusService interface {
 	BuildAndSendInitiateRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64) error
-	//BuildAndSendStopRequest(config *models.RsmGeneralConfiguration, ranName string, enb1MeasurementId int64, enb2MeasurementId int64) error
+	BuildAndSendStopRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64, enb2MeasurementId int64) error
 }
 
 func NewResourceStatusService(logger *logger.Logger, rmrSender *rmrsender.RmrSender) *ResourceStatusService {
@@ -47,46 +47,36 @@ func NewResourceStatusService(logger *logger.Logger, rmrSender *rmrsender.RmrSen
 
 func (m *ResourceStatusService) BuildAndSendInitiateRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64) error {
 
+	return m.buildAndSendResourceStatusRequest(enums.Registration_Request_start, nodeb, config, enb1MeasurementId, 0)
+}
+
+func (m *ResourceStatusService) BuildAndSendStopRequest(nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64, enb2MeasurementId int64) error {
+
+	return m.buildAndSendResourceStatusRequest(enums.Registration_Request_stop, nodeb, config, enb1MeasurementId, enb2MeasurementId)
+}
+
+func (m *ResourceStatusService) buildAndSendResourceStatusRequest(registrationRequest enums.Registration_Request, nodeb *entities.NodebInfo, config *models.RsmGeneralConfiguration, enb1MeasurementId int64, enb2MeasurementId int64) error {
+
 	cellIdList, err := m.extractCellIdList(nodeb)
 
 	if err != nil {
 		return err
 	}
 
-	requestParams := buildResourceStatusInitiateRequestParams(config, cellIdList, enb1MeasurementId)
+	requestParams := buildResourceStatusRequestParams(config, cellIdList, enb1MeasurementId, enb2MeasurementId)
 
-	payload, payloadAsString, err := e2pdus.BuildPackedResourceStatusRequest(enums.Registration_Request_start, requestParams, e2pdus.MaxAsn1PackedBufferSize, e2pdus.MaxAsn1CodecMessageBufferSize, m.logger.DebugEnabled())
+	payload, payloadAsString, err := e2pdus.BuildPackedResourceStatusRequest(registrationRequest, requestParams, e2pdus.MaxAsn1PackedBufferSize, e2pdus.MaxAsn1CodecMessageBufferSize, m.logger.DebugEnabled())
 
 	if err != nil {
-		m.logger.Errorf("#ResourceStatusService.BuildAndSendInitiateRequest - RAN name: %s. Failed to build and pack resource status initiate request. error: %s", nodeb.RanName, err)
+		m.logger.Errorf("#ResourceStatusService.buildAndSendResourceStatusRequest - RAN name: %s. Failed to build and pack resource status %s request. error: %s", nodeb.RanName, registrationRequest, err)
 		return err
 	}
 
-	m.logger.Debugf("#ResourceStatusService.BuildAndSendInitiateRequest - RAN name: %s. Successfully build packed payload: %s", nodeb.RanName, payloadAsString)
+	m.logger.Debugf("#ResourceStatusService.buildAndSendResourceStatusRequest - RAN name: %s. Successfully build packed payload: %s", nodeb.RanName, payloadAsString)
 	rmrMsg := models.NewRmrMessage(rmrcgo.RicResStatusReq, nodeb.RanName, payload)
 
 	return m.rmrSender.Send(rmrMsg)
 }
-
-/*func (m *ResourceStatusService) BuildAndSendStopRequest(config *models.RsmGeneralConfiguration, ranName string, enb1MeasurementId int64, enb2MeasurementId int64) error {
-
-	requestParams := &e2pdus.ResourceStatusRequestData{
-		MeasurementID:  e2pdus.Measurement_ID(enb1MeasurementId),
-		MeasurementID2: e2pdus.Measurement_ID(enb2MeasurementId),
-	}
-
-	payload, payloadAsString, err := e2pdus.BuildPackedResourceStatusRequest(enums.Registration_Request_stop, requestParams, e2pdus.MaxAsn1PackedBufferSize, e2pdus.MaxAsn1CodecMessageBufferSize, m.logger.DebugEnabled())
-
-	if err != nil {
-		m.logger.Errorf("#ResourceStatusService.BuildAndSendStopRequest - RAN name: %s. Failed to build and pack resource status stop request. error: %s", ranName, err)
-		return err
-	}
-
-	m.logger.Debugf("#ResourceStatusService.BuildAndSendStopRequest - RAN name: %s. Successfully build packed payload: %s", ranName, payloadAsString)
-	rmrMsg := models.NewRmrMessage(rmrcgo.RicResStatusReq, ranName, payload)
-
-	return m.rmrSender.Send(rmrMsg)
-}*/
 
 func (m *ResourceStatusService) extractCellIdList(nodeb *entities.NodebInfo) ([]string, error) {
 
@@ -94,7 +84,7 @@ func (m *ResourceStatusService) extractCellIdList(nodeb *entities.NodebInfo) ([]
 
 	if !ok {
 		m.logger.Errorf("#ResourceStatusService.extractCellIdList - RAN name: %s - invalid configuration", nodeb.RanName)
-		return []string{}, fmt.Errorf("Invalid configuration for RAN %s", nodeb.RanName)
+		return []string{}, fmt.Errorf("invalid configuration for RAN %s", nodeb.RanName)
 	}
 
 	cells := enb.Enb.ServedCells
@@ -112,10 +102,11 @@ func (m *ResourceStatusService) extractCellIdList(nodeb *entities.NodebInfo) ([]
 	return cellIdList, nil
 }
 
-func buildResourceStatusInitiateRequestParams(config *models.RsmGeneralConfiguration, cellIdList []string, enb1MeasurementId int64) *e2pdus.ResourceStatusRequestData {
+func buildResourceStatusRequestParams(config *models.RsmGeneralConfiguration, cellIdList []string, enb1MeasurementId int64, enb2MeasurementId int64) *e2pdus.ResourceStatusRequestData {
 	return &e2pdus.ResourceStatusRequestData{
 		CellIdList:                   cellIdList,
 		MeasurementID:                e2pdus.Measurement_ID(enb1MeasurementId),
+		MeasurementID2:               e2pdus.Measurement_ID(enb2MeasurementId),
 		PartialSuccessAllowed:        config.PartialSuccessAllowed,
 		PrbPeriodic:                  config.PrbPeriodic,
 		TnlLoadIndPeriodic:           config.TnlLoadIndPeriodic,

@@ -35,6 +35,7 @@ import (
 const RanName = "test"
 const NodebOneCellPackedExample = "0009003c00000800270003000000001c00010000260004fe000000001d400d00001f40080002f8290007ab00001e4001000040400100006d4001400091400120"
 const NodebTwoCellsPackedExample = "0009004800000800270003000000001c00010000260004fe000000001d401901001f40080002f8290007ab00001f40080002f8290007ab50001e4001000040400100006d4001400091400120"
+const StopPackedExample = "0009004f0000090027000300000000280003000001001c00014000260004fe000000001d401901001f40080002f8290007ab00001f40080002f8290007ab50001e4001000040400100006d4001400091400120"
 
 func initResourceStatusServiceTest(t *testing.T) (*mocks.RmrMessengerMock, *models.RsmGeneralConfiguration, *ResourceStatusService) {
 	logger, err := logger.InitLogger(logger.DebugLevel)
@@ -184,6 +185,58 @@ func TestPackFailure(t *testing.T) {
 	err := resourceStatusService.BuildAndSendInitiateRequest(nodebInfo, rsmGeneralConfiguration, enums.Enb1MeasurementId)
 	assert.NotNil(t, err)
 	rmrMessengerMock.AssertNotCalled(t, "SendMsg")
+}
+
+func TestBuildAndSendStopRequestSuccess(t *testing.T) {
+	rmrMessengerMock, rsmGeneralConfiguration, resourceStatusService := initResourceStatusServiceTest(t)
+
+	cellId1 := "02f829:0007ab00"
+	cellId2 := "02f829:0007ab50"
+	nodebInfo := &entities.NodebInfo{
+		RanName:          RanName,
+		ConnectionStatus: entities.ConnectionStatus_CONNECTED,
+		Configuration: &entities.NodebInfo_Enb{
+			Enb: &entities.Enb{
+				ServedCells: []*entities.ServedCellInfo{{CellId: cellId1}, {CellId: cellId2}},
+			},
+		},
+	}
+	xaction := []byte(RanName)
+	var expectedPayload []byte
+	_, _ = fmt.Sscanf(StopPackedExample, "%x", &expectedPayload)
+	expectedMbuf := rmrcgo.NewMBuf(rmrcgo.RicResStatusReq, len(expectedPayload), RanName, &expectedPayload, &xaction)
+	var err error
+	rmrMessengerMock.On("SendMsg", expectedMbuf).Return(&rmrcgo.MBuf{}, err)
+	err = resourceStatusService.BuildAndSendStopRequest(nodebInfo, rsmGeneralConfiguration, enums.Enb1MeasurementId, 2)
+	assert.Nil(t, err)
+	rmrMessengerMock.AssertCalled(t, "SendMsg", expectedMbuf)
+}
+
+func TestBuildAndSendStopRequestSendFailure(t *testing.T) {
+	rmrMessengerMock, rsmGeneralConfiguration, resourceStatusService := initResourceStatusServiceTest(t)
+
+	xaction := []byte(RanName)
+	cellId1 := "02f829:0007ab00"
+	cellId2 := "02f829:0007ab50"
+	nodebInfo := &entities.NodebInfo{
+		RanName:          RanName,
+		ConnectionStatus: entities.ConnectionStatus_CONNECTED,
+		Configuration: &entities.NodebInfo_Enb{
+			Enb: &entities.Enb{
+				ServedCells: []*entities.ServedCellInfo{{CellId: cellId1}, {CellId: cellId2}},
+			},
+		},
+	}
+
+	var err error
+	var expectedPayload []byte
+	_, _ = fmt.Sscanf(StopPackedExample, "%x", &expectedPayload)
+	expectedMbuf := rmrcgo.NewMBuf(rmrcgo.RicResStatusReq, len(expectedPayload), RanName, &expectedPayload, &xaction)
+	rmrMessengerMock.On("SendMsg", expectedMbuf).Return(&rmrcgo.MBuf{}, rsmerrors.NewRmrError())
+	err = resourceStatusService.BuildAndSendStopRequest(nodebInfo, rsmGeneralConfiguration, enums.Enb1MeasurementId, 2)
+
+	assert.NotNil(t, err)
+	rmrMessengerMock.AssertCalled(t, "SendMsg", expectedMbuf)
 }
 
 func InitRmrSender(rmrMessengerMock *mocks.RmrMessengerMock, log *logger.Logger) *rmrsender.RmrSender {

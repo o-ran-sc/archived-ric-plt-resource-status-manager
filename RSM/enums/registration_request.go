@@ -24,3 +24,7 @@ const (
 	Registration_Request_start Registration_Request = iota
 	Registration_Request_stop
 )
+
+func (rs Registration_Request) String() string {
+	return [...]string{"start", "stop"}[rs]
+}
