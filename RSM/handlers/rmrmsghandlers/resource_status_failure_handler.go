@@ -46,25 +46,25 @@ func (h ResourceStatusFailureHandler) Handle(request *models.RmrRequest) {
 		}
 		h.logger.Debugf("#ResourceStatusFailureHandler.Handle - RAN name: %s - message: %s", request.RanName, pduAsString)
 	}
-	response, err := h.converter.Convert(request.Payload)
-	if err != nil {
-		h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
-		return
-	}
-
-	/*The RSM creates one measurement per cell*/
-
-	if response.MeasurementInitiationResults == nil {
-		h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d",
-			request.RanName,
-			response.ENB1_Measurement_ID,
-			response.ENB2_Measurement_ID)
-	} else {
-		h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d, CellId: %s, FailedReportCharacteristics: %x",
-			request.RanName,
-			response.ENB1_Measurement_ID,
-			response.ENB2_Measurement_ID,
-			response.MeasurementInitiationResults[0].CellId,
-			response.MeasurementInitiationResults[0].MeasurementFailureCauses[0].MeasurementFailedReportCharacteristics)
-	}
+	//response, err := h.converter.Convert(request.Payload)
+	//if err != nil {
+	//	h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
+	//	return
+	//}
+	//
+	///*The RSM creates one measurement per cell*/
+	//
+	//if response.MeasurementInitiationResults == nil {
+	//	h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d",
+	//		request.RanName,
+	//		response.ENB1_Measurement_ID,
+	//		response.ENB2_Measurement_ID)
+	//} else {
+	//	h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d, CellId: %s, FailedReportCharacteristics: %x",
+	//		request.RanName,
+	//		response.ENB1_Measurement_ID,
+	//		response.ENB2_Measurement_ID,
+	//		response.MeasurementInitiationResults[0].CellId,
+	//		response.MeasurementInitiationResults[0].MeasurementFailureCauses[0].MeasurementFailedReportCharacteristics)
+	//}
 }

@@ -90,7 +90,9 @@ func convertMeasurementInitiationResult(measurementInitiationResult_List *C.Meas
 			item := (*C.MeasurementInitiationResult_Item_t)(unsafe.Pointer(&itemIE.value.choice[0]))
 			measurementInitiationResult := models.MeasurementInitiationResult{CellId: buildCellId(item.cell_ID)}
 			if item.measurementFailureCause_List != nil {
-				convertMeasurementFailureCauses(item.measurementFailureCause_List, &measurementInitiationResult)
+				if err:= convertMeasurementFailureCauses(item.measurementFailureCause_List, &measurementInitiationResult); err != nil {
+					return nil, err
+				}
 			}
 			measurementInitiationResults = append(measurementInitiationResults, &measurementInitiationResult)
 		}

@@ -94,7 +94,7 @@ func InitLogger(requested LogLevel) (*Logger, error) {
 	case FatalLevel:
 		logger, err = initLoggerByLevel(zapcore.FatalLevel)
 	default:
-		err = fmt.Errorf("Invalid logging Level :%d", requested)
+		err = fmt.Errorf("invalid logging Level :%d", requested)
 	}
 	if err != nil {
 		return nil, err

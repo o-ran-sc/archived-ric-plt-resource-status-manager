@@ -56,7 +56,7 @@ func (r *rsmWriterInstance) SaveRsmGeneralConfiguration(cfg *models.RsmGeneralCo
 }
 
 
-// SaveWithKeyAndMarshal marshals 
+// SaveWithKeyAndMarshal marshals the Go structure to json and saves it to the DB with key 'key'
 func (r *rsmWriterInstance) SaveWithKeyAndMarshal(key string, entity interface{}) error {
 
 	data, err := json.Marshal(entity)
