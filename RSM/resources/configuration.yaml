@@ -9,15 +9,3 @@ rmr:
 rnib:
   maxRnibConnectionAttempts: 3
   rnibRetryIntervalMs: 10
-resourceStatusParams:
-  enableResourceStatus: true
-  partialSuccessAllowed: true
-  prbPeriodic: true
-  tnlLoadIndPeriodic: true
-  hwLoadIndPeriodic: true
-  absStatusPeriodic: true
-  rsrpMeasurementPeriodic: true
-  csiPeriodic: true
-  periodicityMs: 1000
-  periodicityRsrpMeasurementMs: 480
-  periodicityCsiMs: 20

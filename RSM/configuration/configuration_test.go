@@ -37,19 +37,6 @@ func TestParseConfigurationSuccess(t *testing.T) {
 
 	assert.Equal(t, 3, config.Rnib.MaxRnibConnectionAttempts)
 	assert.Equal(t, 10, config.Rnib.RnibRetryIntervalMs)
-
-	assert.Equal(t, true, config.ResourceStatusParams.EnableResourceStatus)
-	assert.Equal(t, true, config.ResourceStatusParams.PrbPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.TnlLoadIndPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.HwLoadIndPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.AbsStatusPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.RsrpMeasurementPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.CsiPeriodic)
-
-	/*assert.Equal(t, 1, config.ResourceStatusParams.PeriodicityMs)
-	assert.Equal(t, 120, config.ResourceStatusParams.PeriodicityRsrpMeasurementMs)
-	assert.Equal(t, 5, config.ResourceStatusParams.PeriodicityCsiMs)*/
-
 }
 
 func TestParseConfigurationFileNotFoundFailure(t *testing.T) {

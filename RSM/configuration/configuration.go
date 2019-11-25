@@ -20,7 +20,6 @@ package configuration
 import (
 	"fmt"
 	"github.com/spf13/viper"
-	"rsm/enums"
 )
 
 type Configuration struct {
@@ -38,19 +37,6 @@ type Configuration struct {
 	Rnib struct {
 		MaxRnibConnectionAttempts int
 		RnibRetryIntervalMs       int
-	}
-	ResourceStatusParams struct {
-		EnableResourceStatus         bool
-		PartialSuccessAllowed        bool
-		PrbPeriodic                  bool
-		TnlLoadIndPeriodic           bool
-		HwLoadIndPeriodic            bool
-		AbsStatusPeriodic            bool
-		RsrpMeasurementPeriodic      bool
-		CsiPeriodic                  bool
-		PeriodicityMs                enums.ReportingPeriodicity
-		PeriodicityRsrpMeasurementMs enums.ReportingPeriodicityRSRPMR
-		PeriodicityCsiMs             enums.ReportingPeriodicityCSIR
 	}
 }
 
@@ -76,9 +62,6 @@ func ParseConfiguration() (*Configuration, error) {
 		return nil, err
 	}
 	if err := config.fillRnibConfig(viper.Sub("rnib")); err != nil {
-		return nil, err
-	}
-	if err := config.fillResourceStatusParamsConfig(viper.Sub("resourceStatusParams")); err != nil {
 		return nil, err
 	}
 
@@ -120,69 +103,9 @@ func (c *Configuration) fillRnibConfig(rnibConfig *viper.Viper) error {
 	return nil
 }
 
-func (c *Configuration) fillResourceStatusParamsConfig(chConfig *viper.Viper) error {
-	if chConfig == nil {
-		return fmt.Errorf("#configuration.fillResourceStatusParamsConfig - failed to fill resourceStatusParams configuration: The entry 'resourceStatusParams' not found\n")
-	}
-	c.ResourceStatusParams.EnableResourceStatus = chConfig.GetBool("enableResourceStatus")
-	c.ResourceStatusParams.PartialSuccessAllowed = chConfig.GetBool("partialSuccessAllowed")
-	c.ResourceStatusParams.PrbPeriodic = chConfig.GetBool("prbPeriodic")
-	c.ResourceStatusParams.TnlLoadIndPeriodic = chConfig.GetBool("tnlLoadIndPeriodic")
-	c.ResourceStatusParams.HwLoadIndPeriodic = chConfig.GetBool("hwLoadIndPeriodic")
-	c.ResourceStatusParams.AbsStatusPeriodic = chConfig.GetBool("absStatusPeriodic")
-	c.ResourceStatusParams.RsrpMeasurementPeriodic = chConfig.GetBool("rsrpMeasurementPeriodic")
-	c.ResourceStatusParams.CsiPeriodic = chConfig.GetBool("csiPeriodic")
-	if err := setPeriodicityMs(c, chConfig.GetInt("periodicityMs")); err != nil {
-		return err
-	}
-	if err := setPeriodicityRsrpMeasurementMs(c, chConfig.GetInt("periodicityRsrpMeasurementMs")); err != nil {
-		return err
-	}
-	if err := setPeriodicityCsiMs(c, chConfig.GetInt("periodicityCsiMs")); err != nil {
-		return err
-	}
-	return nil
-}
-
-func setPeriodicityMs(c *Configuration, periodicityMs int) error {
-	v, ok := enums.ReportingPeriodicityValues[periodicityMs]
-
-	if !ok {
-		return fmt.Errorf("Invalid configuration value supplied for PeriodicityMs. Received: %d. Should be one of: %v\n", periodicityMs, enums.GetReportingPeriodicityValuesAsKeys())
-	}
-
-	c.ResourceStatusParams.PeriodicityMs = v
-	return nil
-}
-
-func setPeriodicityRsrpMeasurementMs(c *Configuration, periodicityRsrpMeasurementMs int) error {
-	v, ok := enums.ReportingPeriodicityRsrPmrValues[periodicityRsrpMeasurementMs]
-
-	if !ok {
-		return fmt.Errorf("Invalid configuration value supplied for PeriodicityRsrpMeasurementMs. Received: %d. Should be one of: %v\n", periodicityRsrpMeasurementMs, enums.GetReportingPeriodicityRsrPmrValuesAsKeys())
-	}
-
-	c.ResourceStatusParams.PeriodicityRsrpMeasurementMs = v
-	return nil
-}
-
-func setPeriodicityCsiMs(c *Configuration, periodicityCsiMs int) error {
-	v, ok := enums.ReportingPeriodicityCsirValues[periodicityCsiMs]
-
-	if !ok {
-		return fmt.Errorf("Invalid configuration value supplied for PeriodicityCsiMs. Received: %d. Should be one of: %v\n", periodicityCsiMs, enums.GetReportingPeriodicityCsirValuesAsKeys())
-	}
-
-	c.ResourceStatusParams.PeriodicityCsiMs = v
-	return nil
-}
 
 func (c *Configuration) String() string {
-	return fmt.Sprintf("{logging.logLevel: %s, http.port: %d, rmr.port: %d, rmr.maxMsgSize: %d, rmr.readyIntervalSec: %d, rnib.maxRnibConnectionAttempts: %d, rnib.rnibRetryIntervalMs: %d, "+
-		"resourceStatusParams.enableResourceStatus: %t, resourceStatusParams.partialSuccessAllowed: %t, resourceStatusParams.prbPeriodic: %t, "+
-		"resourceStatusParams.tnlLoadIndPeriodic: %t, resourceStatusParams.hwLoadIndPeriodic: %t, resourceStatusParams.absStatusPeriodic: %t,"+
-		"resourceStatusParams.rsrpMeasurementPeriodic: %t, resourceStatusParams.csiPeriodic: %t, resourceStatusParams.periodicityMs: %s, "+
-		"resourceStatusParams.periodicityRsrpMeasurementMs: %s, resourceStatusParams.periodicityCsiMs: %s}",
+	return fmt.Sprintf("{logging.logLevel: %s, http.port: %d, rmr.port: %d, rmr.maxMsgSize: %d, rmr.readyIntervalSec: %d, rnib.maxRnibConnectionAttempts: %d, rnib.rnibRetryIntervalMs: %d, ",
 		c.Logging.LogLevel,
 		c.Http.Port,
 		c.Rmr.Port,
@@ -190,17 +113,5 @@ func (c *Configuration) String() string {
 		c.Rmr.ReadyIntervalSec,
 		c.Rnib.MaxRnibConnectionAttempts,
 		c.Rnib.RnibRetryIntervalMs,
-		c.ResourceStatusParams.EnableResourceStatus,
-		c.ResourceStatusParams.PartialSuccessAllowed,
-		c.ResourceStatusParams.PrbPeriodic,
-		c.ResourceStatusParams.TnlLoadIndPeriodic,
-		c.ResourceStatusParams.HwLoadIndPeriodic,
-		c.ResourceStatusParams.AbsStatusPeriodic,
-		c.ResourceStatusParams.RsrpMeasurementPeriodic,
-		c.ResourceStatusParams.CsiPeriodic,
-
-		c.ResourceStatusParams.PeriodicityMs,
-		c.ResourceStatusParams.PeriodicityRsrpMeasurementMs,
-		c.ResourceStatusParams.PeriodicityCsiMs,
 	)
 }
