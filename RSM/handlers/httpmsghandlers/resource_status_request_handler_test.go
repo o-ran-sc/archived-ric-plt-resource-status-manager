@@ -149,7 +149,7 @@ func TestResourceStatusRequestHandlerTrueStartSuccess(t *testing.T) {
 	assert.Equal(t, actualErr, nil)
 }
 
-func TestResourceStatusRequestHandlerTrueNumberOfFails2(t *testing.T) {
+func TestResourceStatusRequestHandlerTrueNumberOfFails1(t *testing.T) {
 
 	handler, readerMock, rsmReaderMock, rsmWriterMock, resourceStatusServiceMock := initTest(t)
 
@@ -185,7 +185,7 @@ func TestResourceStatusRequestHandlerTrueNumberOfFails2(t *testing.T) {
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendInitiateRequest", 1)
 
-	rsmError := rsmerrors.NewRsmError(2)
+	rsmError := rsmerrors.NewRsmError(1)
 	assert.Equal(t, actualErr, rsmError)
 	assert.Equal(t, actualErr.Error(), rsmError.Error())
 }
@@ -272,7 +272,7 @@ func TestResourceStatusRequestHandlerFalseStopSuccess(t *testing.T) {
 	assert.Equal(t, actualErr, nil)
 }
 
-func TestResourceStatusRequestHandlerFalseNumberOfFails2(t *testing.T) {
+func TestResourceStatusRequestHandlerFalseNumberOfFails1(t *testing.T) {
 
 	handler, readerMock, rsmReaderMock, rsmWriterMock, resourceStatusServiceMock := initTest(t)
 
@@ -308,7 +308,7 @@ func TestResourceStatusRequestHandlerFalseNumberOfFails2(t *testing.T) {
 	rsmWriterMock.AssertNumberOfCalls(t, "SaveRsmRanInfo", 1)
 	resourceStatusServiceMock.AssertNumberOfCalls(t, "BuildAndSendStopRequest", 1)
 
-	rsmError := rsmerrors.NewRsmError(2)
+	rsmError := rsmerrors.NewRsmError(1)
 	assert.Equal(t, actualErr, rsmError)
 	assert.Equal(t, actualErr.Error(), rsmError.Error())
 }

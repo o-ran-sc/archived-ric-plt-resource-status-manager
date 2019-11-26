@@ -61,8 +61,11 @@ func (h ResourceStatusRequestHandler) Handle(request models.Request) error {
 	numberOfFails := 0
 	for _, nbIdentity := range nbIdentityList {
 
-		nodeb, err := h.rNibDataService.GetNodeb((*nbIdentity).GetInventoryName())
+		ranName := (*nbIdentity).GetInventoryName()
+
+		nodeb, err := h.rNibDataService.GetNodeb(ranName)
 		if err != nil {
+			h.logger.Warnf("#ResourceStatusRequestHandler.Handle - Couldn't find RAN %s in RSM DB", ranName)
 			numberOfFails++
 			continue
 		}
@@ -72,7 +75,6 @@ func (h ResourceStatusRequestHandler) Handle(request models.Request) error {
 		if nodeb.ConnectionStatus != entities.ConnectionStatus_CONNECTED {
 			h.logger.Infof("#ResourceStatusRequestHandler.Handle - RAN name: %s - connection status not CONNECTED, ignore", nodeb.RanName)
 			h.logger.Infof("#ResourceStatusRequestHandler.Handle - handle RAN: %s completed", nodeb.RanName)
-			numberOfFails++
 			continue
 		}
 
@@ -109,6 +111,7 @@ func (h ResourceStatusRequestHandler) handleNotStoppedRsmRanInfo(nodebInfo *enti
 	}
 
 	if rsmRanInfo.Enb2MeasurementId == 0 {
+		h.logger.Warnf("#ResourceStatusRequestHandler.handleNotStoppedRsmRanInfo - RAN: %s Enb2MeasurementId is zero", nodebInfo.RanName)
 		return rsmerrors.NewInternalError()
 	}
 
@@ -150,6 +153,7 @@ func (h ResourceStatusRequestHandler) saveRsmRanInfoStartFalse(rsmRanInfo *model
 	rsmRanInfo.Action = enums.Start
 	rsmRanInfo.ActionStatus = false
 	rsmRanInfo.Enb2MeasurementId = 0
+	rsmRanInfo.Enb1MeasurementId = enums.Enb1MeasurementId
 
 	return h.rNibDataService.SaveRsmRanInfo(rsmRanInfo)
 }
