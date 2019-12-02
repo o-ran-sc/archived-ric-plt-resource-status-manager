@@ -16,15 +16,15 @@
 ..  limitations under the License.
 ..
 
-
-Resource Status Manager Release Notes 
-=====================================  
-The following is a list of release highlights for Resource Status Manager:
+Release-Notes
+=============
 
 
-2019 October 31; version 2.0.7 
-------------------------------
-Support Resource Status Request and Response
+This document provides the release notes for the Amber release of Resource Status Manager
+
+.. contents::
+   :depth: 3
+   :local:
 
 
 Version history
@@ -34,149 +34,35 @@ Version history
 | **Date**           | **Ver.**           | **Author**         | **Comment**        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
-| 20XX-XX-XX         | 0.1.0              |                    | First draft        |
+| 2019-10-31         | 2.0.7              | Shuky Har-Noy      | First draft        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
-|                    | 0.1.1              |                    |                    |
-|                    |                    |                    |                    |
-+--------------------+--------------------+--------------------+--------------------+
-|                    | 1.0                |                    |                    |
+| 2019-12-02         | 2.0.10             | Shuky Har-Noy      | Amber Release      |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
 
 
 Summary
-=======
-
-<SUMMARIZE THE RELEASE - THE CONTENT - AND OTHER IMPORTANT HIGH LEVEL PROPERTIES>
-
-
-
+-------
+The Amber release of Resource Status Manager supports Resource Status Request and Response
+	
 
 Release Data
-============
-<STATE RELEVANT RELEASE DATA/RECORDS>
-
-<EXAMPLE>:
-
-+--------------------------------------+--------------------------------------+
-| **Project**                          | E.g. Arno/genesis/fuel@opnfv         |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| **Repo/commit-ID**                   | E.g. genesis/adf634a0d4.....         |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| **Release designation**              | E.g. Arno RC2                        |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| **Release date**                     | E.g. 2015-04-16                      |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| **Purpose of the delivery**          | E.g. OPNFV Internal quality assurance|
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-
-
-
-
-Feature additions
------------------
-<STATE ADDED FEATURES BY REFERENCE TO JIRA>
-
-<EXAMPLE>:
-
-**JIRA BACK-LOG:**
-
-+--------------------------------------+--------------------------------------+
-| **JIRA REFERENCE**                   | **SLOGAN**                           |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| 		                       | 				      |
-|                                      | 				      |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| 	                               |  				      |
-|                                      |  				      |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-
-Bug corrections
----------------
-
-**JIRA TICKETS:**
-
-+--------------------------------------+--------------------------------------+
-| **JIRA REFERENCE**                   | **SLOGAN**                           |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| 		                       | 				      |
-|                                      | 				      |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| 	                               |  				      |
-|                                      |  				      |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-
-Deliverables
 ------------
 
-Software deliverables
-=====================
-
-
-<STATE WHAT SOFTWARE DELIVERABLES THAT ARE RELATED TO THIS VERSION, AND WHERE THOSE CAN BE RETRIEVED>
-
-<EXAMPLE>:
-
-Documentation deliverables
-==========================
-
-<STATE WHAT DOCUMENTATION DELIVERABLES THAT ARE RELATED TO THIS VERSION, AND WHERE THOSE CAN BE RETRIEVED>
-
-<EXAMPLE>:
-
-
-Known Limitations, Issues and Workarounds
-=========================================
-
-System Limitations
-------------------
-<STATE ALL RELEVANT SYSTEM LIMITATIONS, IF THERE IS ANY>
-
-
-
-Known issues
-------------
-<STATE ALL KNOWN ISSUES WITH JIRA REFERENCE>
-
-<EXAMPLE>:
-
-**JIRA TICKETS:**
-
 +--------------------------------------+--------------------------------------+
-| **JIRA REFERENCE**                   | **SLOGAN**                           |
+| **Project**                          | RAN Intelligent Controller  	      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| 		                       | 				      |
-|                                      | 				      |
+| **Repo/commit-ID**                   | ric-plt/resource-status-manager      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| 	                               |  				      |
-|                                      |  				      |
+| **Release designation**              | Amber                                |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-
-Workarounds
------------
-<STATE ALL KNOWN WORKAROUNDS TO THE ISSUES STATED ABOVE, IF THERE IS ANY>
-
-
-
-
-References
-==========
-<STATE RELEVANT REFERENCES FOR THIS RELEASE/VERSION>
-
-
-
+| **Release date**                     | 2019-12-02                           |
+|                                      |                                      |
++--------------------------------------+--------------------------------------+
+| **Purpose of the delivery**          | open-source Resource Status Manager  |
+|                                      |                                      |
++--------------------------------------+--------------------------------------+
