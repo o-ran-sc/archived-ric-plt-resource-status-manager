@@ -2,9 +2,9 @@ module rsm
 
 require (
 	cloud.google.com/go v0.46.3 // indirect
-	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common v1.0.24
-	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities v1.0.24
-	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader v1.0.24
+	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common v1.0.26
+	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities v1.0.26
+	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader v1.0.26
 	gerrit.o-ran-sc.org/r/ric-plt/sdlgo v0.5.0
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
