@@ -16,16 +16,16 @@
 #
 ##############################################################################
 
-FROM nexus3.o-ran-sc.org:10004/bldr-ubuntu16-c-go:2-u16.04-nng as ubuntu
+FROM nexus3.o-ran-sc.org:10004/bldr-ubuntu16-c-go:3-u16.04-nng as ubuntu
 
 WORKDIR /opt/RSM
 COPY . . 
 ENV PATH=$PATH:/usr/local/go/bin:/usr/lib/go-1.12/bin
 # Install RMr library and dev files
-RUN wget --content-disposition  https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/rmr_1.10.0_amd64.deb/download.deb
-RUN dpkg -i rmr_1.10.0_amd64.deb
-RUN wget --content-disposition https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/rmr-dev_1.10.0_amd64.deb/download.deb
-RUN dpkg -i rmr-dev_1.10.0_amd64.deb
+RUN wget --content-disposition  https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/rmr_1.13.0_amd64.deb/download.deb
+RUN dpkg -i rmr_1.13.0_amd64.deb
+RUN wget --content-disposition https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/rmr-dev_1.13.0_amd64.deb/download.deb
+RUN dpkg -i rmr-dev_1.13.0_amd64.deb
 
 
 RUN cd asn1codec && make  
