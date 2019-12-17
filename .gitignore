@@ -2,12 +2,13 @@
 .vscode/launch.json
 *.o
 *.a
-RSM/RSM
-coverage.txt
-RSM/asn1codec/e2ap_engine/converter-example
-RSM/asn1codec/tests/
+RSM/3rdparty/asn1codec/e2ap_engine/converter-example
+RSM/3rdparty/asn1codec/tests/
 RSM/cp.out
 __pycache__/ 
 *.html
 *.log
 venv/*
+# documentation
+.tox
+docs/_build/
