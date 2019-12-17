@@ -20,7 +20,6 @@
 
 package rsmerrors
 
-
 type InvalidJsonError struct {
 	*BaseError
 }
@@ -37,4 +36,3 @@ func NewInvalidJsonError() *InvalidJsonError {
 func (e *InvalidJsonError) Error() string {
 	return e.Message
 }
-

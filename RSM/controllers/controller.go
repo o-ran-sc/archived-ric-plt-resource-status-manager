@@ -20,9 +20,6 @@
 
 package controllers
 
-type IController interface {
-}
-/*
 import (
 	"encoding/json"
 	"io"
@@ -41,6 +38,7 @@ const (
 )
 
 type IController interface {
+	ResourceStatus(writer http.ResponseWriter, r *http.Request)
 }
 
 type Controller struct {
@@ -53,6 +51,18 @@ func NewController(logger *logger.Logger, handlerProvider *httpmsghandlerprovide
 		logger:          logger,
 		handlerProvider: handlerProvider,
 	}
+}
+
+func (c *Controller) ResourceStatus(writer http.ResponseWriter, r *http.Request) {
+	c.logger.Infof("[Client -> RSM] #Controller.ResourceStatus - request: %v", c.prettifyRequest(r))
+
+	request := models.ResourceStatusRequest{}
+
+	if !c.extractJsonBody(r, &request, writer) {
+		return
+	}
+
+	c.handleRequest(writer, &r.Header, httpmsghandlerprovider.ResourceStatusRequest, request, true)
 }
 
 func (c *Controller) extractJsonBody(r *http.Request, request models.Request, writer http.ResponseWriter) bool {
@@ -93,29 +103,15 @@ func (c *Controller) handleRequest(writer http.ResponseWriter, header *http.Head
 		return
 	}
 
-	response, err := (*handler).Handle(request)
+	err = handler.Handle(request)
 
 	if err != nil {
 		c.handleErrorResponse(err, writer)
 		return
 	}
 
-	if response == nil {
-		writer.WriteHeader(http.StatusNoContent)
-		c.logger.Infof("[RSM -> Client] #Controller.handleRequest - status response: %v", http.StatusNoContent)
-		return
-	}
-
-	result, err := response.Marshal()
-
-	if err != nil {
-		c.handleErrorResponse(err, writer)
-		return
-	}
-
-	c.logger.Infof("[RSM -> Client] #Controller.handleRequest - response: %s", result)
-	writer.Header().Set("Content-Type", "application/json")
-	writer.Write([]byte(result))
+	writer.WriteHeader(http.StatusNoContent)
+	c.logger.Infof("[RSM -> Client] #Controller.handleRequest - status response: %v", http.StatusNoContent)
 }
 
 func (c *Controller) validateRequestHeader(header *http.Header) error {
@@ -159,6 +155,10 @@ func (c *Controller) handleErrorResponse(err error, writer http.ResponseWriter) 
 			e2Error, _ := err.(*rsmerrors.RmrError)
 			errorResponseDetails = models.ErrorResponse{Code: e2Error.Code, Message: e2Error.Message}
 			httpError = http.StatusInternalServerError
+		case *rsmerrors.RsmError:
+			e2Error, _ := err.(*rsmerrors.RsmError)
+			errorResponseDetails = models.ErrorResponse{Code: e2Error.Code, Message: e2Error.Message}
+			httpError = http.StatusInternalServerError
 		case *rsmerrors.ResourceNotFoundError:
 			e2Error, _ := err.(*rsmerrors.ResourceNotFoundError)
 			errorResponseDetails = models.ErrorResponse{Code: e2Error.Code, Message: e2Error.Message}
@@ -181,11 +181,9 @@ func (c *Controller) handleErrorResponse(err error, writer http.ResponseWriter) 
 	if err != nil {
 		c.logger.Errorf("#Controller.handleErrorResponse - Cannot send response. writer:%v", writer)
 	}
-}*/
-/*
+}
 func (c *Controller) prettifyRequest(request *http.Request) string {
 	dump, _ := httputil.DumpRequest(request, true)
 	requestPrettyPrint := strings.Replace(string(dump), "\r\n", " ", -1)
 	return strings.Replace(requestPrettyPrint, "\n", "", -1)
 }
-*/

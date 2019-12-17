@@ -21,6 +21,6 @@
 package rsmerrors
 
 type BaseError struct {
-	Code int
+	Code    int
 	Message string
 }

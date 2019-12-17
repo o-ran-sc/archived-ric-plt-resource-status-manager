@@ -34,7 +34,7 @@ servers:
       apiRoot:
         default: 'localhost:?'
 paths:
-  /health:
+  '/health':
     get:
       tags:
         - Health Check
@@ -42,8 +42,35 @@ paths:
       responses:
         '204':
           description: OK
+  '/general/resourcestatus':
+    put:
+      summary: enable/disable resource status
+      tags:
+        - Resource Status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceStatus'
+        required: true
+      responses:
+        '204':
+          description: Success
+        '500':
+          description: Internal error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
+    ResourceStatus:
+      type: object
+      required:
+        - enableResourceStatus
+      properties:
+        enableResourceStatus:
+          type: boolean
     ErrorResponse:
       type: object
       required:
@@ -52,7 +79,7 @@ components:
       properties:
         errorCode:
           type: string
-          description: '401 - corrupted json, 402 - validation error, 403 - RAN in wrong state, 404 - resource not found, 500 - RNIB error, 501 - internal problem, 502 - RMR error'
+          description: '401 - corrupted json, 402 - validation error, 403 - RAN in wrong state, 404 - resource not found, 500 - RNIB error, 501 - internal problem, 502 - RMR error, 503 - RSM error'
         errorMessage:
           type: string
           description: Human readable text

@@ -27,7 +27,6 @@ import (
 	"rsm/converters"
 	"rsm/handlers/rmrmsghandlers"
 	"rsm/logger"
-	"rsm/managers"
 	"rsm/rmrcgo"
 	"rsm/services"
 	"rsm/services/rmrsender"
@@ -42,18 +41,18 @@ type MessageHandlerProvider struct {
 	msgHandlers map[int]rmrmsghandlers.RmrMessageHandler
 }
 
-func NewMessageHandlerProvider(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, unpacker converters.Asn1PduUnpacker) *MessageHandlerProvider {
+func NewMessageHandlerProvider(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusService *services.ResourceStatusService, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) *MessageHandlerProvider {
 	return &MessageHandlerProvider{
-		msgHandlers: initMessageHandlersMap(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager, unpacker),
+		msgHandlers: initMessageHandlersMap(logger, config, rnibDataService, rmrSender, resourceStatusService, rsConverter, rsFailureConverter),
 	}
 }
 
-func initMessageHandlersMap(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusInitiateManager *managers.ResourceStatusInitiateManager, unpacker converters.Asn1PduUnpacker) map[int]rmrmsghandlers.RmrMessageHandler {
+func initMessageHandlersMap(logger *logger.Logger, config *configuration.Configuration, rnibDataService services.RNibDataService, rmrSender *rmrsender.RmrSender, resourceStatusService *services.ResourceStatusService, rsConverter converters.ResourceStatusResponseConverter, rsFailureConverter converters.ResourceStatusFailureConverter) map[int]rmrmsghandlers.RmrMessageHandler {
 	return map[int]rmrmsghandlers.RmrMessageHandler{
-		rmrcgo.RanConnected:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, config, resourceStatusInitiateManager, RanConnected),
-		rmrcgo.RanRestarted:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, config, resourceStatusInitiateManager, RanRestarted),
-		rmrcgo.RicResStatusFailure: rmrmsghandlers.NewResourceStatusFailureHandler(logger, unpacker),
-		rmrcgo.RicResStatusResp:    rmrmsghandlers.NewResourceStatusResponseHandler(logger),
+		rmrcgo.RanConnected:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, rnibDataService, resourceStatusService, RanConnected),
+		rmrcgo.RanRestarted:        rmrmsghandlers.NewResourceStatusInitiateNotificationHandler(logger, rnibDataService, resourceStatusService, RanRestarted),
+		rmrcgo.RicResStatusFailure: rmrmsghandlers.NewResourceStatusFailureHandler(logger, rsFailureConverter),
+		rmrcgo.RicResStatusResp:    rmrmsghandlers.NewResourceStatusResponseHandler(logger, rsConverter, rnibDataService),
 	}
 }
 
@@ -61,7 +60,7 @@ func (provider MessageHandlerProvider) GetMessageHandler(messageType int) (rmrms
 	handler, ok := provider.msgHandlers[messageType]
 
 	if !ok {
-		msg := fmt.Sprintf("#MessageHandlerProvider.GetMessageHandler - notification handler not found for message %d",messageType )
+		msg := fmt.Sprintf("#MessageHandlerProvider.GetMessageHandler - notification handler not found for message %d", messageType)
 		return nil, errors.New(msg)
 	}
 

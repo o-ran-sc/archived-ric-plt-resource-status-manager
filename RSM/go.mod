@@ -2,19 +2,18 @@ module rsm
 
 require (
 	cloud.google.com/go v0.46.3 // indirect
-	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common v1.0.23
-	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities v1.0.23
-	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader v1.0.23
-	gerrit.o-ran-sc.org/r/ric-plt/sdlgo v0.3.1
+	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common v1.0.26
+	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities v1.0.26
+	gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader v1.0.26
+	gerrit.o-ran-sc.org/r/ric-plt/sdlgo v0.5.0
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
 	github.com/coreos/etcd v3.3.15+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
-	github.com/go-ozzo/ozzo-validation v3.5.0+incompatible
+	github.com/go-ozzo/ozzo-validation v3.5.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.0 // indirect
-	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/pprof v0.0.0-20190908185732-236ed259b199 // indirect
 	github.com/google/uuid v1.1.1 // indirect
@@ -59,4 +58,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace gerrit.o-ran-sc.org/r/ric-plt/sdlgo => gerrit.o-ran-sc.org/r/ric-plt/sdlgo.git v0.3.1
+replace gerrit.o-ran-sc.org/r/ric-plt/sdlgo => gerrit.o-ran-sc.org/r/ric-plt/sdlgo.git v0.5.0

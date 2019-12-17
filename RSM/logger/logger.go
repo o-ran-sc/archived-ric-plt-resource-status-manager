@@ -29,7 +29,7 @@ import (
 )
 
 type Logger struct {
-	Logger     *zap.Logger
+	Logger *zap.Logger
 }
 
 // Copied from zap logger
@@ -61,21 +61,21 @@ const (
 	_maxLevel = FatalLevel
 )
 
-var logLevelTokenToLevel = map[string] LogLevel {
-	"debug" : DebugLevel,
-	"info": InfoLevel,
-	"warn": WarnLevel,
-	"error": ErrorLevel,
+var logLevelTokenToLevel = map[string]LogLevel{
+	"debug":  DebugLevel,
+	"info":   InfoLevel,
+	"warn":   WarnLevel,
+	"error":  ErrorLevel,
 	"dpanic": DPanicLevel,
-	"panic": PanicLevel,
-	"fatal": FatalLevel,
+	"panic":  PanicLevel,
+	"fatal":  FatalLevel,
 }
 
 func LogLevelTokenToLevel(level string) (LogLevel, bool) {
-	if level, ok := logLevelTokenToLevel[strings.TrimSpace(strings.ToLower(level))];ok {
+	if level, ok := logLevelTokenToLevel[strings.TrimSpace(strings.ToLower(level))]; ok {
 		return level, true
 	}
-	return _maxLevel+1, false
+	return _maxLevel + 1, false
 }
 
 func InitLogger(requested LogLevel) (*Logger, error) {
@@ -97,39 +97,39 @@ func InitLogger(requested LogLevel) (*Logger, error) {
 	case FatalLevel:
 		logger, err = initLoggerByLevel(zapcore.FatalLevel)
 	default:
-		err = fmt.Errorf("Invalid logging Level :%d",requested)
+		err = fmt.Errorf("invalid logging Level :%d", requested)
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &Logger{Logger:logger}, nil
+	return &Logger{Logger: logger}, nil
 
 }
-func(l *Logger)Sync() error {
+func (l *Logger) Sync() error {
 	l.Debugf("#logger.Sync - Going to flush buffered log")
 	return l.Logger.Sync()
 }
 
-func (l *Logger)Infof(formatMsg string, a ...interface{})  {
+func (l *Logger) Infof(formatMsg string, a ...interface{}) {
 	if l.InfoEnabled() {
 		msg := fmt.Sprintf(formatMsg, a...)
 		l.Logger.Info(msg, zap.Any("mdc", l.getTimeStampMdc()))
 	}
 }
 
-func (l *Logger)Debugf(formatMsg string, a ...interface{})  {
-	if l.DebugEnabled(){
+func (l *Logger) Debugf(formatMsg string, a ...interface{}) {
+	if l.DebugEnabled() {
 		msg := fmt.Sprintf(formatMsg, a...)
 		l.Logger.Debug(msg, zap.Any("mdc", l.getTimeStampMdc()))
 	}
 }
 
-func (l *Logger)Errorf(formatMsg string, a ...interface{})  {
+func (l *Logger) Errorf(formatMsg string, a ...interface{}) {
 	msg := fmt.Sprintf(formatMsg, a...)
 	l.Logger.Error(msg, zap.Any("mdc", l.getTimeStampMdc()))
 }
 
-func (l *Logger)Warnf(formatMsg string, a ...interface{})  {
+func (l *Logger) Warnf(formatMsg string, a ...interface{}) {
 	msg := fmt.Sprintf(formatMsg, a...)
 	l.Logger.Warn(msg, zap.Any("mdc", l.getTimeStampMdc()))
 }
@@ -140,15 +140,15 @@ func (l *Logger) getTimeStampMdc() map[string]string {
 	return mdc
 }
 
-func (l *Logger)InfoEnabled()bool{
+func (l *Logger) InfoEnabled() bool {
 	return l.Logger.Core().Enabled(zap.InfoLevel)
 }
 
-func (l *Logger)DebugEnabled()bool{
+func (l *Logger) DebugEnabled() bool {
 	return l.Logger.Core().Enabled(zap.DebugLevel)
 }
 
-func (l *Logger)DPanicf(formatMsg string, a ...interface{})  {
+func (l *Logger) DPanicf(formatMsg string, a ...interface{}) {
 	msg := fmt.Sprintf(formatMsg, a...)
 	l.Logger.DPanic(msg, zap.Any("mdc", l.getTimeStampMdc()))
 }
@@ -184,4 +184,3 @@ func epochMillisIntegerTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncode
 	millis := int64(nanos) / int64(time.Millisecond)
 	enc.AppendInt64(millis)
 }
-

@@ -23,22 +23,23 @@ package main
 import (
 	"fmt"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader"
+	"gerrit.o-ran-sc.org/r/ric-plt/sdlgo"
 	"os"
 	"rsm/configuration"
 	"rsm/controllers"
 	"rsm/converters"
+	"rsm/e2pdus"
 	"rsm/httpserver"
 	"rsm/logger"
-	"rsm/managers"
 	"rsm/managers/rmrmanagers"
+	"rsm/providers/httpmsghandlerprovider"
 	"rsm/rmrcgo"
+	"rsm/rsmdb"
 	"rsm/services"
 	"rsm/services/rmrreceiver"
 	"rsm/services/rmrsender"
 	"strconv"
 )
-
-const MaxRnibPoolInstances = 4
 
 func main() {
 	config, err := configuration.ParseConfiguration()
@@ -52,23 +53,29 @@ func main() {
 		fmt.Printf("#app.main - failed to initialize logger, error: %s", err)
 		os.Exit(1)
 	}
-	reader.Init("e2Manager", MaxRnibPoolInstances)
+	db := sdlgo.NewDatabase()
+	e2mSdl := sdlgo.NewSdlInstance("e2Manager", db)
+	rsmSdl := sdlgo.NewSdlInstance("rsm", db)
+
+	defer e2mSdl.Close()
+	defer rsmSdl.Close()
+
 	logger.Infof("#app.main - Configuration %s", config)
-	defer reader.Close()
-	rnibDataService := services.NewRnibDataService(logger, config, reader.GetRNibReader)
+	rnibDataService := services.NewRnibDataService(logger, config, reader.GetRNibReader(e2mSdl), rsmdb.GetRsmReader(rsmSdl), rsmdb.GetRsmWriter(rsmSdl))
 	var msgImpl *rmrcgo.Context
 	rmrMessenger := msgImpl.Init(config.Rmr.ReadyIntervalSec, "tcp:"+strconv.Itoa(config.Rmr.Port), config.Rmr.MaxMsgSize, 0, logger)
 	rmrSender := rmrsender.NewRmrSender(logger, rmrMessenger)
 
-	resourceStatusInitiateManager := managers.NewResourceStatusInitiateManager(logger, rnibDataService, rmrSender)
-	var rmrManager = rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusInitiateManager,converters.NewX2apPduUnpacker(logger))
+	resourceStatusService := services.NewResourceStatusService(logger, rmrSender)
+	unpacker := converters.NewX2apPduUnpacker(logger, e2pdus.MaxAsn1CodecMessageBufferSize)
+	var rmrManager = rmrmanagers.NewRmrMessageManager(logger, config, rnibDataService, rmrSender, resourceStatusService, converters.NewResourceStatusResponseConverter(unpacker), converters.NewResourceStatusFailureConverter(unpacker))
 
 	rmrReceiver := rmrreceiver.NewRmrReceiver(logger, rmrMessenger, rmrManager)
 	defer rmrMessenger.Close()
 	go rmrReceiver.ListenAndHandle()
 
-	//handlerProvider := httpmsghandlerprovider.NewRequestHandlerProvider(logger, rmrSender, config, rnibDataService)
+	handlerProvider := httpmsghandlerprovider.NewRequestHandlerProvider(logger, rnibDataService, resourceStatusService)
 	rootController := controllers.NewRootController(rnibDataService)
-	//controller := controllers.NewController(logger, handlerProvider)
-	_ = httpserver.Run(config.Http.Port, rootController)
+	controller := controllers.NewController(logger, handlerProvider)
+	_ = httpserver.Run(config.Http.Port, rootController, controller)
 }

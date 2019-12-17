@@ -24,6 +24,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"rsm/enums"
+	"rsm/models"
 	"strconv"
 )
 
@@ -54,4 +56,20 @@ func GetHttpRequest() *http.Request {
 	_ = json.NewEncoder(b).Encode(data)
 	req, _ := http.NewRequest("POST", "https://localhost:3800/request", b)
 	return req
+}
+
+func GetRsmGeneralConfiguration(enableResourceStatus bool) *models.RsmGeneralConfiguration {
+	return &models.RsmGeneralConfiguration{
+		EnableResourceStatus:         enableResourceStatus,
+		PartialSuccessAllowed:        true,
+		PrbPeriodic:                  true,
+		TnlLoadIndPeriodic:           true,
+		HwLoadIndPeriodic:            true,
+		AbsStatusPeriodic:            true,
+		RsrpMeasurementPeriodic:      true,
+		CsiPeriodic:                  true,
+		PeriodicityMs:                enums.ReportingPeriodicity_one_thousand_ms,
+		PeriodicityRsrpMeasurementMs: enums.ReportingPeriodicityRSRPMR_four_hundred_80_ms,
+		PeriodicityCsiMs:             enums.ReportingPeriodicityCSIR_ms20,
+	}
 }

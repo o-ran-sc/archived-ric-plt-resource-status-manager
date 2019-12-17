@@ -25,5 +25,5 @@ import (
 )
 
 type RequestHandler interface {
-	Handle(request models.Request) (models.IResponse, error)
+	Handle(request models.Request) error
 }

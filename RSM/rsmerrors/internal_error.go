@@ -25,9 +25,9 @@ type InternalError struct {
 }
 
 func NewInternalError() *InternalError {
-	return &InternalError {
+	return &InternalError{
 		&BaseError{
-			Code: 501,
+			Code:    501,
 			Message: "Internal Server Error. Please try again later",
 		},
 	}

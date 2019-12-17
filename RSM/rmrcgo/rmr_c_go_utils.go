@@ -33,23 +33,23 @@ import (
 )
 
 func convertToMBuf(m *C.rmr_mbuf_t) *MBuf {
-	payloadArr := C.GoBytes(unsafe.Pointer(m.payload),C.int(m.len))
-	xActionArr := C.GoBytes(unsafe.Pointer(m.xaction),C.int(RMR_MAX_XACTION_LEN))
+	payloadArr := C.GoBytes(unsafe.Pointer(m.payload), C.int(m.len))
+	xActionArr := C.GoBytes(unsafe.Pointer(m.xaction), C.int(RMR_MAX_XACTION_LEN))
 
 	// Trim padding (space and 0)
-	xActionStr :=  strings.TrimRight(string(xActionArr),"\040\000")
+	xActionStr := strings.TrimRight(string(xActionArr), "\040\000")
 	xActionArr = []byte(xActionStr)
 
 	mbuf := &MBuf{
-		MType: int(m.mtype),
-		Len:   int(m.len),
+		MType:   int(m.mtype),
+		Len:     int(m.len),
 		Payload: &payloadArr,
 		XAction: &xActionArr,
 	}
 
 	meidBuf := make([]byte, RMR_MAX_MEID_LEN)
 	if meidCstr := C.rmr_get_meid(m, (*C.uchar)(unsafe.Pointer(&meidBuf[0]))); meidCstr != nil {
-		mbuf.Meid =	strings.TrimRight(string(meidBuf), "\000")
+		mbuf.Meid = strings.TrimRight(string(meidBuf), "\000")
 	}
 
 	return mbuf
@@ -57,7 +57,7 @@ func convertToMBuf(m *C.rmr_mbuf_t) *MBuf {
 
 func (ctx *Context) getAllocatedCRmrMBuf(logger *logger.Logger, mBuf *MBuf, maxMsgSize int) (cMBuf *C.rmr_mbuf_t) {
 	var xActionBuf [RMR_MAX_XACTION_LEN]byte
-	var meidBuf[RMR_MAX_MEID_LEN]byte
+	var meidBuf [RMR_MAX_MEID_LEN]byte
 
 	cMBuf = C.rmr_alloc_msg(ctx.RmrCtx, C.int(maxMsgSize))
 	cMBuf.mtype = C.int(mBuf.MType)
@@ -68,13 +68,13 @@ func (ctx *Context) getAllocatedCRmrMBuf(logger *logger.Logger, mBuf *MBuf, maxM
 
 	//Add padding
 	copy(xActionBuf[:], *mBuf.XAction)
-	for i:= xActionLen; i < RMR_MAX_XACTION_LEN; i++{
+	for i := xActionLen; i < RMR_MAX_XACTION_LEN; i++ {
 		xActionBuf[i] = '\040' //space
 	}
 
 	// Add padding
 	copy(meidBuf[:], mBuf.Meid)
-	for i:= len(mBuf.Meid); i < RMR_MAX_MEID_LEN; i++{
+	for i := len(mBuf.Meid); i < RMR_MAX_MEID_LEN; i++ {
 		meidBuf[i] = 0
 	}
 
@@ -91,7 +91,7 @@ func (ctx *Context) getAllocatedCRmrMBuf(logger *logger.Logger, mBuf *MBuf, maxM
 		ctx.Logger.Errorf(
 			"#rmrCgoUtils.getAllocatedCRmrMBuf - Failed to read xAction data to allocated RMR message buffer")
 	}
-	len := C.rmr_bytes2meid(cMBuf,  (*C.uchar)(unsafe.Pointer(&meidBuf[0])), C.int(RMR_MAX_MEID_LEN))
+	len := C.rmr_bytes2meid(cMBuf, (*C.uchar)(unsafe.Pointer(&meidBuf[0])), C.int(RMR_MAX_MEID_LEN))
 	if int(len) != RMR_MAX_MEID_LEN {
 		ctx.Logger.Errorf(
 			"#rmrCgoUtils.getAllocatedCRmrMBuf - Failed to copy meid data to allocated RMR message buffer")
