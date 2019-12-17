@@ -1,0 +1,10 @@
+---
+distribution_type: container
+container_release_tag: 2.0.10
+container_pull_registry: nexus3.o-ran-sc.org:10004
+container_push_registry: nexus3.o-ran-sc.org:10002
+project: ric-plt/resource-status-manager
+ref: 759122fd30e7ee7e83d84967f162d59a79818fc5
+containers:
+    - name: ric-plt-resource-status-manager
+      version: 2.0.10
