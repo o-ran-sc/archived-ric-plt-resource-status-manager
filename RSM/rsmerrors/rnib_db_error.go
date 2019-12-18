@@ -25,9 +25,9 @@ type RnibDbError struct {
 }
 
 func NewRnibDbError() *RnibDbError {
-	return &RnibDbError {
+	return &RnibDbError{
 		&BaseError{
-			Code: 500,
+			Code:    500,
 			Message: "RNIB error",
 		},
 	}

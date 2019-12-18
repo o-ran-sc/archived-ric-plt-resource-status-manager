@@ -30,17 +30,32 @@ import (
 	"time"
 )
 
-func setupRouterAndMocks() (*mux.Router, *mocks.RootControllerMock) {
+func setupRouterAndMocks() (*mux.Router, *mocks.RootControllerMock, *mocks.ControllerMock) {
 	rootControllerMock := &mocks.RootControllerMock{}
 	rootControllerMock.On("HandleHealthCheckRequest").Return(nil)
 
+	controllerMock := &mocks.ControllerMock{}
+	controllerMock.On("ResourceStatus").Return(nil)
+
 	router := mux.NewRouter()
-	initializeRoutes(router, rootControllerMock)
-	return router, rootControllerMock
+	initializeRoutes(router, rootControllerMock, controllerMock)
+	return router, rootControllerMock, controllerMock
+}
+func TestResourceStatus(t *testing.T) {
+	router, _, controllerMock := setupRouterAndMocks()
+
+	req, err := http.NewRequest("PUT", "/v1/general/resourcestatus", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+
+	controllerMock.AssertNumberOfCalls(t, "ResourceStatus", 1)
 }
 
 func TestRouteGetHealth(t *testing.T) {
-	router, rootControllerMock := setupRouterAndMocks()
+	router, rootControllerMock, _ := setupRouterAndMocks()
 
 	req, err := http.NewRequest("GET", "/v1/health", nil)
 	if err != nil {
@@ -53,7 +68,7 @@ func TestRouteGetHealth(t *testing.T) {
 }
 
 func TestRouteNotFound(t *testing.T) {
-	router, _ := setupRouterAndMocks()
+	router, _, _ := setupRouterAndMocks()
 
 	req, err := http.NewRequest("GET", "/v1/no/such/route", nil)
 	if err != nil {
@@ -66,18 +81,17 @@ func TestRouteNotFound(t *testing.T) {
 }
 
 func TestRunError(t *testing.T) {
-	rootControllerMock := &mocks.RootControllerMock{}
+	_, rootControllerMock, controllerMock := setupRouterAndMocks()
 
-	err := Run(111222333, rootControllerMock)
+	err := Run(111222333, rootControllerMock, controllerMock)
 
 	assert.NotNil(t, err)
 }
 
 func TestRun(t *testing.T) {
-	rootControllerMock := &mocks.RootControllerMock{}
-	rootControllerMock.On("HandleHealthCheckRequest").Return(nil)
+	_, rootControllerMock, controllerMock := setupRouterAndMocks()
 
-	go Run(11223, rootControllerMock)
+	go Run(11223, rootControllerMock, controllerMock)
 
 	time.Sleep(time.Millisecond * 100)
 	resp, err := http.Get("http://localhost:11223/v1/health")

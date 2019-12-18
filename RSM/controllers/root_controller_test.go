@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/common"
 	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/entities"
-	"gerrit.o-ran-sc.org/r/ric-plt/nodeb-rnib.git/reader"
 	"github.com/stretchr/testify/assert"
 	"net"
 	"net/http"
@@ -45,12 +44,12 @@ func setupRootControllerTest(t *testing.T) (services.RNibDataService, *mocks.Rni
 	if err != nil {
 		t.Errorf("#... - failed to parse configuration error: %s", err)
 	}
-	readerMock := &mocks.RnibReaderMock{}
-	rnibReaderProvider := func() reader.RNibReader {
-		return readerMock
-	}
-	rnibDataService := services.NewRnibDataService(logger, config, rnibReaderProvider)
-	return rnibDataService, readerMock
+	rnibReaderMock := &mocks.RnibReaderMock{}
+	rsmReaderMock := &mocks.RsmReaderMock{}
+	rsmWriterMock := &mocks.RsmWriterMock{}
+
+	rnibDataService := services.NewRnibDataService(logger, config, rnibReaderMock, rsmReaderMock, rsmWriterMock)
+	return rnibDataService, rnibReaderMock
 }
 
 func TestNewRequestController(t *testing.T) {

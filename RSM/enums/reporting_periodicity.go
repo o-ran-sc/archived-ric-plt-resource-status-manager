@@ -68,4 +68,3 @@ func GetReportingPeriodicityValuesAsKeys() []int {
 
 	return keys
 }
-

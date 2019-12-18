@@ -25,9 +25,9 @@ type HeaderValidationError struct {
 }
 
 func NewHeaderValidationError() *HeaderValidationError {
-	return &HeaderValidationError {
+	return &HeaderValidationError{
 		&BaseError{
-			Code: 415,
+			Code:    415,
 			Message: "Header validation error",
 		},
 	}

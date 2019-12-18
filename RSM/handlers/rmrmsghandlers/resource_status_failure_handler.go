@@ -28,25 +28,46 @@ import (
 )
 
 type ResourceStatusFailureHandler struct {
-	logger *logger.Logger
-	unpacker converters.Asn1PduUnpacker
+	logger    *logger.Logger
+	converter converters.IResourceStatusResponseConverter
 }
 
-func NewResourceStatusFailureHandler(logger *logger.Logger, unpacker converters.Asn1PduUnpacker) ResourceStatusFailureHandler {
+func NewResourceStatusFailureHandler(logger *logger.Logger, converter converters.IResourceStatusResponseConverter) ResourceStatusFailureHandler {
 	return ResourceStatusFailureHandler{
-		logger:logger,
-		unpacker: unpacker,
+		logger:    logger,
+		converter: converter,
 	}
 }
 
 func (h ResourceStatusFailureHandler) Handle(request *models.RmrRequest) {
 	h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - Received resource status failure notification", request.RanName)
-	pduAsString, err := h.unpacker.UnpackX2apPduAsString(request.Len, request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
-	if err != nil {
-		h.logger.Errorf("#ResourceStatusFailureHandler.Handle - unpack failed. Error: %v", err)
-	} else {
-		h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - message: %s", request.RanName, pduAsString)
+	if h.logger.DebugEnabled() {
+		pduAsString, err := h.converter.UnpackX2apPduAsString(request.Payload, e2pdus.MaxAsn1CodecMessageBufferSize)
+		if err != nil {
+			h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
+			return
+		}
+		h.logger.Debugf("#ResourceStatusFailureHandler.Handle - RAN name: %s - message: %s", request.RanName, pduAsString)
 	}
+	//response, err := h.converter.Convert(request.Payload)
+	//if err != nil {
+	//	h.logger.Errorf("#ResourceStatusFailureHandler.Handle - RAN name: %s - unpack failed. Error: %v", request.RanName, err)
+	//	return
+	//}
+	//
+	///*The RSM creates one measurement per cell*/
+	//
+	//if response.MeasurementInitiationResults == nil {
+	//	h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d",
+	//		request.RanName,
+	//		response.ENB1_Measurement_ID,
+	//		response.ENB2_Measurement_ID)
+	//} else {
+	//	h.logger.Infof("#ResourceStatusFailureHandler.Handle - RAN name: %s - ENB1_Measurement_ID: %d, ENB2_Measurement_ID: %d, CellId: %s, FailedReportCharacteristics: %x",
+	//		request.RanName,
+	//		response.ENB1_Measurement_ID,
+	//		response.ENB2_Measurement_ID,
+	//		response.MeasurementInitiationResults[0].CellId,
+	//		response.MeasurementInitiationResults[0].MeasurementFailureCauses[0].MeasurementFailedReportCharacteristics)
+	//}
 }
-
-

@@ -40,19 +40,6 @@ func TestParseConfigurationSuccess(t *testing.T) {
 
 	assert.Equal(t, 3, config.Rnib.MaxRnibConnectionAttempts)
 	assert.Equal(t, 10, config.Rnib.RnibRetryIntervalMs)
-
-	assert.Equal(t, true, config.ResourceStatusParams.EnableResourceStatus)
-	assert.Equal(t, true, config.ResourceStatusParams.PrbPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.TnlLoadIndPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.HwLoadIndPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.AbsStatusPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.RsrpMeasurementPeriodic)
-	assert.Equal(t, true, config.ResourceStatusParams.CsiPeriodic)
-
-	/*assert.Equal(t, 1, config.ResourceStatusParams.PeriodicityMs)
-	assert.Equal(t, 120, config.ResourceStatusParams.PeriodicityRsrpMeasurementMs)
-	assert.Equal(t, 5, config.ResourceStatusParams.PeriodicityCsiMs)*/
-
 }
 
 func TestParseConfigurationFileNotFoundFailure(t *testing.T) {
@@ -75,10 +62,9 @@ func TestParseConfigurationFileNotFoundFailure(t *testing.T) {
 
 func TestRmrConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"logging":         map[string]interface{}{"logLevel": "info"},
-		"http":            map[string]interface{}{"port": 631},
-		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
-		"rnib":            map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
@@ -89,10 +75,10 @@ func TestRmrConfigNotFoundFailure(t *testing.T) {
 
 func TestLoggingConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"rmr":             map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"http":            map[string]interface{}{"port": 631},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"http":                 map[string]interface{}{"port": 631},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
-		"rnib":            map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
@@ -103,10 +89,10 @@ func TestLoggingConfigNotFoundFailure(t *testing.T) {
 
 func TestHttpConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"rmr":             map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging":         map[string]interface{}{"logLevel": "info"},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
 		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
-		"rnib":            map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
+		"rnib":                 map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
@@ -117,79 +103,15 @@ func TestHttpConfigNotFoundFailure(t *testing.T) {
 
 func TestRnibConfigNotFoundFailure(t *testing.T) {
 	yamlMap := map[string]interface{}{
-		"rmr":             map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging":         map[string]interface{}{"logLevel": "info"},
-		"http":            map[string]interface{}{"port": 631},
-		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityCsiMs": 5},
+		"rmr":                  map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
+		"logging":              map[string]interface{}{"logLevel": "info"},
+		"http":                 map[string]interface{}{"port": 631},
 	}
 	cleanUp := prepareTempConfigForTest(t, yamlMap)
 	defer cleanUp()
 
 	_, cErr := ParseConfiguration()
 	assert.EqualError(t, cErr, "#configuration.fillRnibConfig - failed to fill RNib configuration: The entry 'rnib' not found\n")
-}
-
-func TestResourceStatusParamsConfigNotFoundFailure(t *testing.T) {
-
-	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
-	}
-	cleanUp := prepareTempConfigForTest(t, yamlMap)
-	defer cleanUp()
-
-	_, cErr := ParseConfiguration()
-	assert.EqualError(t, cErr, "#configuration.fillResourceStatusParamsConfig - failed to fill resourceStatusParams configuration: The entry 'resourceStatusParams' not found\n")
-}
-
-func TestCharacteristicsConfigInvalidPeriodicityMs(t *testing.T) {
-
-	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
-		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityMs": 50, "periodicityRsrpMeasurementMs": 480, "periodicityCsiMs": 20},
-	}
-	cleanUp := prepareTempConfigForTest(t, yamlMap)
-	defer cleanUp()
-
-	_, cErr := ParseConfiguration()
-	assert.Error(t, cErr)
-}
-
-func TestResourceStatusParamsConfigInvalidPeriodicityRsrpMeasurementMs(t *testing.T) {
-
-	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
-		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityMs": 1000, "periodicityRsrpMeasurementMs": 50, "periodicityCsiMs": 20},
-	}
-	cleanUp := prepareTempConfigForTest(t, yamlMap)
-	defer cleanUp()
-
-	_, cErr := ParseConfiguration()
-	assert.Error(t, cErr)
-}
-
-func TestResourceStatusParamsConfigInvalidPeriodicityCsiMs(t *testing.T) {
-
-	yamlMap := map[string]interface{}{
-		"rmr":     map[string]interface{}{"port": 6942, "maxMsgSize": 4096},
-		"logging": map[string]interface{}{"logLevel": "info"},
-		"http":    map[string]interface{}{"port": 631},
-		"rnib":    map[string]interface{}{"maxRnibConnectionAttempts": 3, "rnibRetryIntervalMs": 10},
-		"resourceStatusParams": map[string]interface{}{"enableResourceStatus": true, "periodicityMs": 1000, "periodicityRsrpMeasurementMs": 480, "periodicityCsiMs": 50},
-	}
-	cleanUp := prepareTempConfigForTest(t, yamlMap)
-	defer cleanUp()
-
-	_, cErr := ParseConfiguration()
-	assert.Error(t, cErr)
 }
 
 func TestConfigurationString(t *testing.T) {
@@ -203,7 +125,6 @@ func TestConfigurationString(t *testing.T) {
 	assert.Contains(t, str, "http")
 	assert.Contains(t, str, "rmr")
 	assert.Contains(t, str, "rnib")
-	assert.Contains(t, str, "resourceStatusParams")
 }
 
 func prepareTempConfigForTest(t *testing.T, yamlMap map[string]interface{}) func() {

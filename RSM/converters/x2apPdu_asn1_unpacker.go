@@ -31,43 +31,37 @@ import (
 	"unsafe"
 )
 
-type Asn1PduUnpacker interface {
-	UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error)
-}
-
 type X2apPduUnpacker struct {
-	logger *logger.Logger
-
+	logger               *logger.Logger
+	maxMessageBufferSize int
 }
 
-func NewX2apPduUnpacker(logger *logger.Logger) Asn1PduUnpacker {
-	return &X2apPduUnpacker{logger :logger}
+func NewX2apPduUnpacker(logger *logger.Logger, maxMessageBufferSize int) X2apPduUnpacker {
+	return X2apPduUnpacker{logger: logger, maxMessageBufferSize: maxMessageBufferSize}
 }
 
-func (r X2apPduUnpacker) UnpackX2apPdu(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (*C.E2AP_PDU_t, error) {
+func (r X2apPduUnpacker) UnpackX2apPdu(packedBuf []byte) (*C.E2AP_PDU_t, error) {
 	pdu := C.new_pdu()
 
 	if pdu == nil {
 		return nil, errors.New("allocation failure (pdu)")
 	}
 
-	r.logger.Infof("#x2apPdu_asn1_unpacker.UnpackX2apPdu - Packed pdu(%d):%x", packedBufferSize, packedBuf)
-
-	errBuf := make([]C.char, maxMessageBufferSize)
-	if !C.per_unpack_pdu(pdu, C.ulong(packedBufferSize), (*C.uchar)(unsafe.Pointer(&packedBuf[0])), C.ulong(len(errBuf)), &errBuf[0]) {
+	errBuf := make([]C.char, r.maxMessageBufferSize)
+	if !C.per_unpack_pdu(pdu, C.ulong(len(packedBuf)), (*C.uchar)(unsafe.Pointer(&packedBuf[0])), C.ulong(len(errBuf)), &errBuf[0]) {
 		return nil, errors.New(fmt.Sprintf("unpacking error: %s", C.GoString(&errBuf[0])))
 	}
 
 	if r.logger.DebugEnabled() {
 		C.asn1_pdu_printer(pdu, C.size_t(len(errBuf)), &errBuf[0])
-		r.logger.Debugf("#x2apPdu_asn1_unpacker.UnpackX2apPdu - PDU: %v  packed size:%d", C.GoString(&errBuf[0]), packedBufferSize)
+		r.logger.Debugf("#x2apPdu_asn1_unpacker.UnpackX2apPdu - PDU: %v  packed size:%d", C.GoString(&errBuf[0]), len(packedBuf))
 	}
 
 	return pdu, nil
 }
 
-func (r X2apPduUnpacker)UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error) {
-	pdu, err := r.UnpackX2apPdu(packedBufferSize, packedBuf, maxMessageBufferSize)
+func (r X2apPduUnpacker) UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error) {
+	pdu, err := r.UnpackX2apPdu(packedBuf)
 	if err != nil {
 		return "", err
 	}
@@ -78,6 +72,3 @@ func (r X2apPduUnpacker)UnpackX2apPduAsString(packedBufferSize int, packedBuf []
 	C.asn1_pdu_printer(pdu, C.size_t(len(buf)), &buf[0])
 	return C.GoString(&buf[0]), nil
 }
-
-
-

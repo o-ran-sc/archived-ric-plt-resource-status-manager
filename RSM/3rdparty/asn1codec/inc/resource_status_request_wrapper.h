@@ -37,8 +37,9 @@ extern "C"
 
 bool
 build_pack_resource_status_request(
-		uint8_t const* pLMN_Identity,
-        uint8_t const* eUTRANCellIdentifier,
+		uint8_t const** pLMN_Identities,
+        uint8_t const** eUTRANCellIdentifiers,
+        size_t nECGIs,
 		Measurement_ID_t measurement_ID, Measurement_ID_t measurement_ID2,
 		Registration_Request_t registration_Request /*Registration_Request_start,Registration_Request_stop,Registration_Request_partial_stop, Registration_Request_add*/,
 		uint32_t reportCharacteristics,
@@ -51,8 +52,9 @@ build_pack_resource_status_request(
 
 bool
 build_pack_resource_status_request_aux(
-		uint8_t const* pLMN_Identity,
-        uint8_t const* eUTRANCellIdentifier,
+		uint8_t const** pLMN_Identities,
+        uint8_t const** eUTRANCellIdentifiers,
+        size_t nECGIs,
 		Measurement_ID_t measurement_ID, Measurement_ID_t measurement_ID2,
 		Registration_Request_t registration_Request /*Registration_Request_start,Registration_Request_stop,Registration_Request_partial_stop, Registration_Request_add*/,
 		uint32_t reportCharacteristics,

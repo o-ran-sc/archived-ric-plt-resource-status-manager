@@ -29,7 +29,6 @@ import (
 	"rsm/tests"
 	"strconv"
 	"testing"
-	"time"
 )
 
 var (
@@ -55,28 +54,12 @@ func TestNewMBufSuccess(t *testing.T) {
 	assert.Equal(t, msg.Meid, "RanName")
 	assert.Equal(t, msg.Len, len(tests.DummyPayload))
 }
-//TODO check why test failure and TestIsReadySuccess success
-func TestInitFailure(t *testing.T) {
-	log := initLog(t)
-	go initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
-	time.Sleep(time.Second)
-	if msgr != nil {
-		t.Errorf("The rmr router is ready, should be not ready")
-	}
-}
-
-func TestIsReadyFailure(t *testing.T) {
-	log := initLog(t)
-	go initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
-	assert.True(t, msgr == nil || !msgr.IsReady())
-}
 
 func TestSendRecvMsgSuccess(t *testing.T) {
 	log := initLog(t)
 
-	go initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
-	time.Sleep(time.Duration(2) * time.Second)
-	if msgr == nil || !msgr.IsReady()  {
+	initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
+	if msgr == nil || !msgr.IsReady() {
 		t.Errorf("#rmr_c_go_api_test.TestSendRecvMsgSuccess - The rmr router is not ready")
 	}
 
@@ -97,9 +80,8 @@ func TestSendRecvMsgSuccess(t *testing.T) {
 func TestSendMsgRmrInvalidPortError(t *testing.T) {
 	log := initLog(t)
 
-	go initRmr(tests.ReadyIntervalSec, "tcp:" + strconv.Itoa(5555), tests.MaxMsgSize, tests.Flags, log)
-	time.Sleep(time.Duration(2) * time.Second)
-	if msgr == nil || !msgr.IsReady()  {
+	initRmr(tests.ReadyIntervalSec, "tcp:"+strconv.Itoa(5555), tests.MaxMsgSize, tests.Flags, log)
+	if msgr == nil || !msgr.IsReady() {
 		t.Errorf("#rmr_c_go_api_test.TestSendMsgRmrInvalidPortError - The rmr router is not ready")
 	}
 
@@ -116,9 +98,8 @@ func TestSendMsgRmrInvalidPortError(t *testing.T) {
 func TestSendMsgRmrInvalidMsgNumError(t *testing.T) {
 	log := initLog(t)
 
-	go initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
-	time.Sleep(time.Duration(2) * time.Second)
-	if msgr == nil || !msgr.IsReady()  {
+	initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
+	if msgr == nil || !msgr.IsReady() {
 		t.Errorf("#rmr_c_go_api_test.TestSendMsgRmrInvalidMsgNumError - The rmr router is not ready")
 	}
 
@@ -135,14 +116,15 @@ func TestSendMsgRmrInvalidMsgNumError(t *testing.T) {
 func TestIsReadySuccess(t *testing.T) {
 	log := initLog(t)
 
-	go initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
-	time.Sleep(time.Duration(tests.ReadyIntervalSec))
-	if msgr == nil || !msgr.IsReady()  {
+	initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
+	if msgr == nil || !msgr.IsReady() {
 		t.Errorf("#rmr_c_go_api_test.TestIsReadySuccess - The rmr router is not ready")
 	}
+
+	msgr.Close()
 }
 
-func initRmr(readyIntervalSec int, port string, maxMsgSize int, flags int, log *logger.Logger){
+func initRmr(readyIntervalSec int, port string, maxMsgSize int, flags int, log *logger.Logger) {
 	var ctx *Context
 	msgr = ctx.Init(readyIntervalSec, port, maxMsgSize, flags, log)
 }

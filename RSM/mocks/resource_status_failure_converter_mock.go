@@ -13,24 +13,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-//  This source code is part of the near-RT RIC (RAN Intelligent Controller)
-//  platform project (RICP).
-
+//
 
 package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
+	"rsm/models"
 )
 
-type Asn1PduUnpackerMock struct {
+type ResourceStatusFailureConverterMock struct {
 	mock.Mock
 }
 
-func (m *Asn1PduUnpackerMock)UnpackX2apPduAsString(packedBufferSize int, packedBuf []byte, maxMessageBufferSize int) (string, error){
-	args := m.Called(packedBufferSize, packedBuf, maxMessageBufferSize)
-	return args.Get(0).(string), args.Error(1)
+func (m *ResourceStatusFailureConverterMock) Convert(packedBuf []byte) (*models.ResourceStatusResponse, error) {
+	args := m.Called(packedBuf)
+	return args.Get(0).(*models.ResourceStatusResponse), args.Error(1)
 }
 
-
+func (m *ResourceStatusFailureConverterMock) UnpackX2apPduAsString(packedBuf []byte, maxMessageBufferSize int) (string, error) {
+	args := m.Called(packedBuf, maxMessageBufferSize)
+	return args.Get(0).(string), args.Error(1)
+}
