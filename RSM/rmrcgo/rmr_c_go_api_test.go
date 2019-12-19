@@ -27,7 +27,6 @@ import (
 	"io/ioutil"
 	"rsm/logger"
 	"rsm/tests"
-	"strconv"
 	"testing"
 )
 
@@ -55,7 +54,7 @@ func TestNewMBufSuccess(t *testing.T) {
 	assert.Equal(t, msg.Len, len(tests.DummyPayload))
 }
 
-func TestSendRecvMsgSuccess(t *testing.T) {
+/*func TestSendRecvMsgSuccess(t *testing.T) {
 	log := initLog(t)
 
 	initRmr(tests.ReadyIntervalSec, tests.GetPort(), tests.MaxMsgSize, tests.Flags, log)
@@ -128,6 +127,7 @@ func initRmr(readyIntervalSec int, port string, maxMsgSize int, flags int, log *
 	var ctx *Context
 	msgr = ctx.Init(readyIntervalSec, port, maxMsgSize, flags, log)
 }
+*/
 
 func initLog(t *testing.T) *logger.Logger {
 	log, err := logger.InitLogger(logger.DebugLevel)
