@@ -75,7 +75,7 @@ func TestNewMBufSuccess(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, msgR)
 	msgr.Close()
-}*/
+}
 
 func TestSendMsgRmrInvalidPortError(t *testing.T) {
 	log := initLog(t)
@@ -128,6 +128,7 @@ func initRmr(readyIntervalSec int, port string, maxMsgSize int, flags int, log *
 	var ctx *Context
 	msgr = ctx.Init(readyIntervalSec, port, maxMsgSize, flags, log)
 }
+*/
 
 func initLog(t *testing.T) *logger.Logger {
 	log, err := logger.InitLogger(logger.DebugLevel)
