@@ -15,10 +15,13 @@
 // limitations under the License.
 //
 
+//  This source code is part of the near-RT RIC (RAN Intelligent Controller)
+//  platform project (RICP).
+
 package converters
 
-// #cgo CFLAGS: -I../asn1codec/inc/ -I../asn1codec/e2ap_engine/
-// #cgo LDFLAGS: -L ../asn1codec/lib/ -L../asn1codec/e2ap_engine/ -le2ap_codec -lasncodec
+// #cgo CFLAGS: -I../3rdparty/asn1codec/inc/ -I../3rdparty/asn1codec/e2ap_engine/
+// #cgo LDFLAGS: -L ../3rdparty/asn1codec/lib/ -L../3rdparty/asn1codec/e2ap_engine/ -le2ap_codec -lasncodec
 // #include <asn1codec_utils.h>
 // #include <resource_status_response_wrapper.h>
 import "C"
