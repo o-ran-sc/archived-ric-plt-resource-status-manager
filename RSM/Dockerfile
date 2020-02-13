@@ -20,11 +20,12 @@
 #   platform project (RICP).
 #
 
-FROM nexus3.o-ran-sc.org:10004/bldr-ubuntu16-c-go:3-u16.04-nng as ubuntu
+FROM nexus3.o-ran-sc.org:10004/bldr-ubuntu18-c-go:4-u18.04-nng as ubuntu
 
 WORKDIR /opt/RSM
 COPY . . 
-ENV PATH=$PATH:/usr/local/go/bin:/usr/lib/go-1.12/bin
+ENV PATH=$PATH:/opt/go/1.12/bin
+
 # Install RMr library and dev files
 RUN wget --content-disposition  https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/rmr_1.13.0_amd64.deb/download.deb
 RUN dpkg -i rmr_1.13.0_amd64.deb
