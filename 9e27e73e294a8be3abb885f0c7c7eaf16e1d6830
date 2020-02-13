@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b3a9487_bd9f97aa",
+        "filename": "RSM/Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-02-13T14:16:35Z",
+      "side": 1,
+      "message": "I did not change this, but to be consistent with the base image, it probably should be 18.04",
+      "range": {
+        "startLine": 52,
+        "startChar": 5,
+        "endLine": 52,
+        "endChar": 17
+      },
+      "revId": "9e27e73e294a8be3abb885f0c7c7eaf16e1d6830",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
